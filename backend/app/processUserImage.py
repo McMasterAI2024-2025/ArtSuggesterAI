@@ -131,17 +131,17 @@ def rank_colours(image_name):
         # Reverse the colour_ids mapping
         reverse_colour_ids = {v: k for k, v in colour_ids.items()}
 
-        # Example: if 23 is the most common colour
         colour_index = ranked_colour_ids[i]
-        ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
+        print(ranked_colour_ids[i])
 
-
+        # ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
 
 
     return ranked_colour_ids[:5]
 
 
-# print(rank_colours("IMG_0058.jpg"))
+print("test")
+print(rank_colours("IMG_0058.jpg"))
 
 
 
@@ -156,7 +156,7 @@ def rank_colours(image_name):
 
 
 
-def processUserImage(image_name,fixed_color_list):
+def processUserImage(image_name):
     # Get the current script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -226,7 +226,7 @@ def processUserImage(image_name,fixed_color_list):
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
     # Find 5 most prominent colours
-    colour_ranks = fixed_color_list
+    colour_ranks = rank_colours(image_name)
     #BUT WE NEED TO MAKE THESE BACK INTO THE INDEXES INSTEAD OF ACTUAL COLOR NAMES
 
 
@@ -249,7 +249,9 @@ def processUserImage(image_name,fixed_color_list):
     for i in range(7):
         processed_image.append(0)
 
+    print("here")
+    print(processed_image)
     SimilaritySearch(processed_image)
 
 
-# processUserImage("ob1.jpg")
+# processUserImage("IMG_0058.jpg")
