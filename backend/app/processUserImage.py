@@ -16,10 +16,7 @@ from similaritySearch import SimilaritySearch
 
 
 
-
 def rank_colours(image_name):
-
-    # Color palette with RGB values
     # dictionary of colour codes
     colour_codes = {
         "red_normal": (255, 0, 0),
@@ -67,81 +64,83 @@ def rank_colours(image_name):
         "white": (255,255,255)
     }
 
+    # colour_ids dictionary maps each color name (key) from the colour_codes dictionary to an index
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
 
-    # Convert the colour_codes dict to a numpy array for faster computation
+    # convert to a numpy array for faster computation
     colour_codes_array = np.array(list(colour_codes.values()))
 
-
     # Build a k-d tree for fast nearest neighbor search
+    # if a search isnt a direct hit it will go to the closest
     colour_tree = cKDTree(colour_codes_array)
 
-
-
-
-
-
-
-
-
-
-
-
+    # Counter to store color frequency
+    # processes the image pixel by pixel.
+    # for each pixel it determines the closest color using the k-d tree.
+    # the counter holds each colour and how many pixels are that certain colour
     colour_counter = Counter()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
 
+    # Create the full path to the uploaded image file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     uploads_dir = os.path.join(script_dir, "uploads")
     file_path = os.path.join(uploads_dir, image_name)
 
 
+    # open the image and convert it to RGB
     img = Image.open(file_path).convert('RGB')
+
+    # resize the image to 128x128
     img = img.resize((128, 128))
-    img_array = np.array(img)  # Convert to NumPy array
 
-    # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
-    img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
+    # turn to numpy
+    img_array = np.array(img)
 
+    # reshape the 3D array (128x128x3) into 2D array (128*128)x3
+    img_array = img_array.reshape(-1, 3)  # flatten to (16384, 3)
+    # this is for the rgb 16384 rows and 3 columns
 
-    # Calculate the squared distance for each pixel to every color in the colour_codes
-    distances, indices = colour_tree.query(img_array)  # Query all pixels at once
+    # calculate distance for each pixel to every color in the colour_codes
+    distances, indices = colour_tree.query(img_array)  # do all pixels at once
 
-    # For each pixel, increment the count for the closest color
+    # for each pixel increment the count for the closest color
     for idx in indices:
-        closest_colour = list(colour_codes.keys())[idx]
-        colour_counter[closest_colour] += 1
+        closest_colour = list(colour_codes.keys())[idx]  # get the closest color name
+        colour_counter[closest_colour] += 1  # increment the count for that color
 
-    # Sort the colours by frequency (most common first)
+    # sort the colours by frequency (most common first)
     ranked_colour_ids = [colour_ids[colour] for colour, _ in colour_counter.most_common()]
 
-    exclude_colours = [42,24,25,26,22,23,17]
+    # list of colors to exclude from the ranking
+    # these colours are the most common background colours
+    # we only want the paint bottles/pencil crayon colours
+    # brown, light brown, white are some common "background" colours we do not want
+    exclude_colours = [42, 24, 25, 26, 22, 23, 17]
 
+    # filter out excluded colors
     new_ranked_colour_ids = []
     for c in ranked_colour_ids:
         if c not in exclude_colours:
             new_ranked_colour_ids.append(c)
     ranked_colour_ids = new_ranked_colour_ids
 
-
+    # if fewer than 5 colours repeat the most common colours to fill up the list
     if len(ranked_colour_ids) < 5:
-        # If fewer than 5 colours, repeat the most common colours to fill up the list
         ranked_colour_ids += [ranked_colour_ids[0]] * (5 - len(ranked_colour_ids))
 
-    for i in range(len(ranked_colour_ids)):
-        # Reverse the colour_ids mapping
-        reverse_colour_ids = {v: k for k, v in colour_ids.items()}
+    # for i in range(len(ranked_colour_ids)):
+        # reverse the colour_ids mapping to get the color names
+        # reverse_colour_ids = {v: k for k, v in colour_ids.items()}
 
-        colour_index = ranked_colour_ids[i]
-        print(ranked_colour_ids[i])
+        # get the index of the current color
+        # colour_index = ranked_colour_ids[i]
 
+        # Uncomment this line to convert indices back to color names
         # ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
 
-
+    # return the top 5 ranked colour IDs (meaning indexes/integers)
     return ranked_colour_ids[:5]
 
-
-print("test")
-print(rank_colours("IMG_0058.jpg"))
 
 
 
@@ -157,7 +156,7 @@ print(rank_colours("IMG_0058.jpg"))
 
 
 def processUserImage(image_name):
-    # Get the current script's directory
+    # files location
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     uploads_dir = os.path.join(script_dir, "uploads")
@@ -212,46 +211,34 @@ def processUserImage(image_name):
     else:
         he_medium = [0,0,1] #1,0,0
 
+    # adding the medium to the main array
     for e in he_medium:
         processed_image.append(e)
 
-    print(processed_image)
 
-
+    # preprocess again this time for the extracting of most common colours
     img = Image.open(file_path).convert('RGB')
     img = img.resize((128, 128))
-    img_array = np.array(img)  # Convert to NumPy array
+    img_array = np.array(img) 
 
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
     # Find 5 most prominent colours
     colour_ranks = rank_colours(image_name)
-    #BUT WE NEED TO MAKE THESE BACK INTO THE INDEXES INSTEAD OF ACTUAL COLOR NAMES
+    top_colours = np.array(colour_ranks[:5]).flatten() #np array
 
 
-    top_colours = np.array(colour_ranks[:5]).flatten()
-
-    # for col in range(len(top_colours)):
-    #     if top_colours[col] == 19:
-    #         top_colours[col] = 21
-    #     elif top_colours[col] >= 20:
-    #         top_colours[col] +=7
-
-    if len(top_colours) < 5:
-        # If fewer than 5 colours, repeat the most common colours to fill up the list
-        top_colours += [top_colours[0]] * (5 - len(top_colours))
-
-
+    # add colours to main array
     for col in top_colours:
         processed_image.append(col)
 
+    # for now we just have all 0s for the style
     for i in range(7):
         processed_image.append(0)
 
-    print("here")
-    print(processed_image)
     SimilaritySearch(processed_image)
+    #finally send our array to similarity search
 
 
 # processUserImage("IMG_0058.jpg")
