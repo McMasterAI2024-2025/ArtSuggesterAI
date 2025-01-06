@@ -10,19 +10,25 @@ Art Suggester is an AI-based art recommendation tool designed to optimize image 
 ## :computer: Tech Stack
 
 ### Frontend:
-- React.js  
-- HTML  
-- CSS  
+<p style="display: flex; justify-content: center; align: center;">
+    <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React.js" />
+    <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML" />
+    <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS" />
+</p>
 
 ### Backend:
-- Python  
-- TensorFlow  
-- Flask  
-- NumPy  
-- Python Imaging Library (PIL)  
+<p style="display: flex; justify-content: center; align: center;">
+    <img src="https://img.shields.io/badge/Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python" />
+    <img src="https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white" alt="TensorFlow" />
+    <img src="https://img.shields.io/badge/Flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
+    <img src="https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy" />
+    <img src="https://img.shields.io/badge/PIL-%23C92D2D.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python Imaging Library (PIL)" />
+</p>
 
 ### Database:
-- MongoDB
+<p style="display: flex; justify-content: center; align: center;">
+    <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+</p>
 
 ## :wrench: Model Architecture & Training the Model
 The project uses a Convolutional Neural Network (CNN) built with TensorFlow to classify art mediums. The model was trained using images from various online databases consisting of paintings and drawings across different mediums such as paint, pencil crayons, and markers.
