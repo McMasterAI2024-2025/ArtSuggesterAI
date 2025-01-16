@@ -13,7 +13,7 @@ from sklearn.cluster import KMeans
 from skimage.color import rgb2lab, deltaE_cie76
 from similaritySearch import SimilaritySearch
 from scipy.spatial.distance import cdist
-
+from database import addUser, login
 
 
 app = Flask(__name__)
@@ -62,6 +62,7 @@ SUGGESTED_IMAGES_DIR = 'returnImages'
 if not os.path.exists(SUGGESTED_IMAGES_DIR):
     os.makedirs(SUGGESTED_IMAGES_DIR)
 
+##Route to send favourite images to frontend
 @app.route('/suggestedImages/<int:id>', methods=['GET'])
 def get_images(id):
     try:
@@ -85,6 +86,23 @@ def get_images(id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+##Route to login
+@app.post('/registerUser/<email>/<password>')
+def register(email, password):
+    call = addUser(email, password)
+    #print(call)
+    if call == None:
+        return jsonify("Error: email already taken"), 500
+    return jsonify ("User added successfully"), 200
+
+@app.post('/login/<email>/<password>')
+def userLogin(email, password):
+    call = login(email, password)
+    if call == None:
+        return jsonify("Error: login unsuccessful"), 500
+    return jsonify ("Logged in successfully"), 200
+
 
 # Run program
 if __name__ == "__main__":
