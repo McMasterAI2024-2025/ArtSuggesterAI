@@ -1,12 +1,12 @@
-/*
- * Harrison, Johann, Aiden
- */
-
 import './UploadSection.css';
 import DragNdrop from './DragNDrop';
-import React from 'react';
+import React, { useState } from 'react';
+import CameraCapture from './CameraCapture';
 
 export default function UploadSection({ uploadFile, setUploadFile, panelOpen, setPanelOpen }) {
+
+    // webcam state control for showing and hiding the webcam preview
+    const [showCamera, setShowCamera] = useState(false);
 
     const uploadBtnClick = async () => {
         if (panelOpen || uploadFile == null) return;
@@ -39,9 +39,18 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
     return (
         <>
             <div className="upload-section">
-                <DragNdrop uploadFile={uploadFile} setUploadFile={setUploadFile}/>
+                <DragNdrop uploadFile={uploadFile} setUploadFile={setUploadFile} />
+                <button 
+                    className="take-photo-btn" 
+                    onClick={() => setShowCamera(prevState => !prevState)} // toggle camera visibility
+                >
+                    {showCamera ? 'Close Webcam' : 'Open Webcam' /* change button name when camera state is toggled */ }
+                </button>
+                {showCamera && (
+                    <CameraCapture setUploadFile={setUploadFile} setPanelOpen={setPanelOpen} />
+                )}
                 <button className="upload-btn" onClick={uploadBtnClick}>Upload</button>
-                <p>Supported file types: .pdf, .jpg, .webp, ...</p>
+                <p className="supported-types">Supported file types: .pdf, .jpg, .webp, ...</p>
             </div>
         </>
     );

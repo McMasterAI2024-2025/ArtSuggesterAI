@@ -1,12 +1,28 @@
-/*
- * Harrison Johns
- */
-
 .upload-section {
   max-width: 600px;
   margin: 0 auto;
   margin-top: 60px;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.take-photo-btn {
+  background-color: var(--accent);
+  color: var(--content);
+  border: none;
+  padding: 10px 35px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all .5s ease;
+  box-shadow: 2px 2px var(--accent-hover);
+}
+
+.take-photo-btn:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 4px 4px var(--accent);
 }
 
 .upload-btn {
@@ -20,6 +36,7 @@
   cursor: pointer;
   transition: all .5s ease;
   box-shadow: 2px 2px var(--accent-hover);
+  align-self: flex-start;
 }
 
 .upload-btn:hover {
@@ -30,4 +47,8 @@
 .upload-section p {
   margin: 0;
   font-size: .8rem;
+}
+
+.supported-types {
+  align-self: flex-start;
 }
