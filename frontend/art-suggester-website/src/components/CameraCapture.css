@@ -1,0 +1,77 @@
+.camera-capture-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.camera-preview {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    border-radius: 15px;
+    border: 2px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.capture-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 35px;
+    border-radius: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px darkred;
+}
+
+button:hover {
+    background-color: darkred;
+    box-shadow: 4px 4px crimson;
+}
+
+.capture-actions button[disabled] {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+.capture-actions button {
+    background-color: red;
+}
+
+.capture-actions button:hover {
+    background-color: darkred;
+}
+
+.capture-actions img {
+    margin-top: 10px;
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.capture-actions div {
+    margin-top: 20px;
+}
