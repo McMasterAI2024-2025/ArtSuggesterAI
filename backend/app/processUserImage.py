@@ -15,12 +15,20 @@ import cv2
 from similaritySearch import SimilaritySearch
 
 
+def saturation_filter(img): 
+    img_hsv = np.array(img.convert('HSV')) # convert image to HSV then to a NumPy array
+
+    saturation = img_hsv.reshape(-1,3)[:,1] # flatten and retrieve saturation only
+
+    threshold = np.percentile(saturation, 30) # calculate 30th percentile value
+
+    high_saturation_pixels = saturation >= threshold # save the top 70% most saturated values
+
+    return high_saturation_pixels # return boolean mask ("True" for high saturation pixels)
 
 
 def rank_colours(image_name):
-
-    # Color palette with RGB values
-    # dictionary of colour codes
+    # Color palette with RGB values: dictionary of colour codes
     colour_codes = {
         "red_normal": (255, 0, 0),
         "red_dark": (139, 0, 0),
@@ -68,32 +76,14 @@ def rank_colours(image_name):
     }
 
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
-
-    # Convert the colour_codes dict to a numpy array for faster computation
-    colour_codes_array = np.array(list(colour_codes.values()))
-
-
-    # Build a k-d tree for fast nearest neighbor search
-    colour_tree = cKDTree(colour_codes_array)
-
-
-
-
-
-
-
-
-
-
-
+    colour_codes_array = np.array(list(colour_codes.values()))     # Convert the colour_codes dict to a numpy array for faster computation
+    colour_tree = cKDTree(colour_codes_array)     # Build a k-d tree for fast nearest neighbor search
 
     colour_counter = Counter()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-
     uploads_dir = os.path.join(script_dir, "uploads")
     file_path = os.path.join(uploads_dir, image_name)
-
 
     img = Image.open(file_path).convert('RGB')
     img = img.resize((128, 128))
@@ -102,26 +92,22 @@ def rank_colours(image_name):
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
+    # retrieve boolean mask for highly saturated pixels (true if high saturation)
+    high_saturation_pixels = saturation_filter(img)
 
     # Calculate the squared distance for each pixel to every color in the colour_codes
     distances, indices = colour_tree.query(img_array)  # Query all pixels at once
 
-    # For each pixel, increment the count for the closest color
-    for idx in indices:
+    # filter pixels by saturation using boolean mask
+    high_saturation_indices = indices[high_saturation_pixels]
+
+    # For each highly-saturated pixel, increment the count for the closest color
+    for idx in high_saturation_indices:
         closest_colour = list(colour_codes.keys())[idx]
         colour_counter[closest_colour] += 1
 
     # Sort the colours by frequency (most common first)
     ranked_colour_ids = [colour_ids[colour] for colour, _ in colour_counter.most_common()]
-
-    exclude_colours = [42,24,25,26,22,23,17]
-
-    new_ranked_colour_ids = []
-    for c in ranked_colour_ids:
-        if c not in exclude_colours:
-            new_ranked_colour_ids.append(c)
-    ranked_colour_ids = new_ranked_colour_ids
-
 
     if len(ranked_colour_ids) < 5:
         # If fewer than 5 colours, repeat the most common colours to fill up the list
@@ -135,22 +121,10 @@ def rank_colours(image_name):
         colour_index = ranked_colour_ids[i]
         ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
 
-
-
-
     return ranked_colour_ids[:5]
 
 
 # print(rank_colours("IMG_0058.jpg"))
-
-
-
-
-
-
-
-
-
 
 
 
