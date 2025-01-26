@@ -68,91 +68,60 @@ def rank_colours(image_name):
     }
 
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
-
-    # Convert the colour_codes dict to a numpy array for faster computation
     colour_codes_array = np.array(list(colour_codes.values()))
-
-
-    # Build a k-d tree for fast nearest neighbor search
     colour_tree = cKDTree(colour_codes_array)
-
-
-
-
-
-
-
-
-
-
-
-
     colour_counter = Counter()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-
     uploads_dir = os.path.join(script_dir, "uploads")
     file_path = os.path.join(uploads_dir, image_name)
 
-
     img = Image.open(file_path).convert('RGB')
     img = img.resize((128, 128))
-    img_array = np.array(img)  # Convert to NumPy array
+    img_array = np.array(img)
 
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
+    edge_pixels = np.vstack([
+        img_array[:128],                   # Top edge
+        img_array[-128:],                  # Bottom edge
+        img_array[::128],                  # Left edge
+        img_array[127::128]                # Right edge
+    ])
 
-    # Calculate the squared distance for each pixel to every color in the colour_codes
-    distances, indices = colour_tree.query(img_array)  # Query all pixels at once
+    edge_distances, edge_indices = colour_tree.query(edge_pixels)
+    edge_counter = Counter(edge_indices)
 
-    # For each pixel, increment the count for the closest color
+    # Determine dominant background colors
+    background_threshold = 0.1 * len(img_array)  # Threshold for background exclusion
+    background_colors = [
+        idx for idx, count in edge_counter.items() if count > background_threshold
+    ]
+
+    # Querey all pixels for colour mapping
+    distances, indices = colour_tree.query(img_array)
+
+    # Count occurrences, excluding background colors
     for idx in indices:
-        closest_colour = list(colour_codes.keys())[idx]
-        colour_counter[closest_colour] += 1
+        if idx not in background_colors:
+            closest_colour = list(colour_codes.keys())[idx]
+            colour_counter[closest_colour] += 1
 
-    # Sort the colours by frequency (most common first)
+    # Sort colors by frequency
     ranked_colour_ids = [colour_ids[colour] for colour, _ in colour_counter.most_common()]
 
-    exclude_colours = [42,24,25,26,22,23,17]
-
-    new_ranked_colour_ids = []
-    for c in ranked_colour_ids:
-        if c not in exclude_colours:
-            new_ranked_colour_ids.append(c)
-    ranked_colour_ids = new_ranked_colour_ids
-
-
     if len(ranked_colour_ids) < 5:
-        # If fewer than 5 colours, repeat the most common colours to fill up the list
         ranked_colour_ids += [ranked_colour_ids[0]] * (5 - len(ranked_colour_ids))
 
-    for i in range(len(ranked_colour_ids)):
-        # Reverse the colour_ids mapping
-        reverse_colour_ids = {v: k for k, v in colour_ids.items()}
+    # Reverse the colour_ids mapping
+    reverse_colour_ids = {v: k for k, v in colour_ids.items()}
+    ranked_colours = [reverse_colour_ids.get(colour_index) for colour_index in ranked_colour_ids]
 
-        # Example: if 23 is the most common colour
-        colour_index = ranked_colour_ids[i]
-        ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
-
-
-
-
-    return ranked_colour_ids[:5]
+    return ranked_colours[:5]
 
 
 # print(rank_colours("IMG_0058.jpg"))
-
-
-
-
-
-
-
-
-
-
-
 
 
 
