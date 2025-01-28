@@ -20,8 +20,8 @@ def saturation_filter(img):
 
     saturation = img_hsv.reshape(-1,3)[:,1] # flatten and retrieve saturation only
 
+    # boolean mask for top 10% highly saturated pixels 
     threshold = np.percentile(saturation, 90) 
-
     high_saturation_pixels = saturation >= threshold 
 
     return high_saturation_pixels # return boolean mask ("True" for high saturation pixels)
@@ -125,8 +125,7 @@ def rank_colours(image_name):
 
 
 # print(rank_colours("IMG_0058.jpg"))
-
-print(rank_colours("il_1588xN.2795732705_1nlr.jpg"))
+print(rank_colours("IMG_0056.jpg"))
 
 
 
