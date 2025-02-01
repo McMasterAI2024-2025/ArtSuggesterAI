@@ -4,9 +4,11 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 import certifi
 
-load_dotenv()
-database_url = os.getenv("MONGODB_URI")
+MONGODB_URI = "mongodb+srv://j:j@cluster0.jry9m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
+load_dotenv()
+#database_url = os.getenv("MONGODB_URI")
+database_url = MONGODB_URI
 cluster = MongoClient(database_url)
 db = cluster["artSuggester"]
 collection = db["users"]
@@ -39,4 +41,38 @@ def login(email: str, password: str):
         return None
     return ("Success")
 
-login("francis@gmail.com", 123)
+#login("francis@gmail.com", 123)
+
+def updateFavStyle(email: str, password: str, style: int):
+    if login(email,password) == "Success":
+        collection.update_one({"email": email}, {"$set": {"favStyle": style}})
+        return ("FavStyle updated")
+    return None
+
+
+def removeFavStyle(email: str, password: str):
+    if login(email,password) == "Success":
+        collection.update_one({"email": email}, {"$set": {"favStyle": [0,0,0,0,0]}})
+        return ("FavStyle cleared")
+    return None
+
+#updateFavStyle("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
+#removeFavStyle("francis@gmail.com","ChrisPChicken")
+
+def addFavImage(email: str, password: str, img: int):
+    if login(email,password) == "Success":
+        collection.update_one({"email": email}, {"$push": {"favourites": img}})
+        return ("Favourite image added")
+    return None
+
+def removeFavImage(email: str, password: str, img: int):
+    if login(email,password) == "Success":
+        imgExists = collection.find_one({"email": email, "favourites": {"$in": [img]}})
+        if imgExists == None: 
+            return None
+        collection.update_one({"email": email}, {"$pull": {"favourites": img}})
+        return ("Image removed from favourites")
+    return None
+
+#addFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
+#removeFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
