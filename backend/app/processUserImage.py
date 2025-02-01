@@ -14,6 +14,53 @@ from collections import Counter
 import cv2
 from similaritySearch import SimilaritySearch
 
+colour_codes = {
+    "red_normal": (255, 0, 0),
+    "red_dark": (139, 0, 0),
+    "red_light": (255, 102, 102),
+    "green_normal": (0, 128, 0),
+    "green_dark": (0, 100, 0),
+    "green_light": (144, 238, 144),
+    "blue_normal": (0, 0, 255),
+    "blue_dark": (0, 0, 139),
+    "blue_light": (173, 216, 230),
+    "yellow_normal": (255, 255, 0),
+    "yellow_dark": (204, 204, 0),
+    "yellow_light": (255, 255, 153),
+    "orange_normal": (255, 165, 0),
+    "orange_dark": (255, 140, 0),
+    "orange_light": (255, 200, 102),
+    "purple_normal": (128, 0, 128),
+    "purple_dark": (75, 0, 130),
+    "purple_light": (216, 191, 216),
+    "pink_normal": (255, 192, 203),
+    "pink_dark": (255, 105, 180),
+    "pink_light": (255, 182, 193),
+    "brown_normal": (165, 42, 42),
+    "brown_dark": (101, 67, 33),
+    "brown_light": (222, 184, 135),
+    "gray_normal": (128, 128, 128),
+    "gray_dark": (105, 105, 105),
+    "gray_light": (211, 211, 211),
+    "cyan_normal": (0, 255, 255),
+    "cyan_dark": (0, 139, 139),
+    "cyan_light": (224, 255, 255),
+    "magenta_normal": (255, 0, 255),
+    "magenta_dark": (139, 0, 139),
+    "magenta_light": (255, 153, 255),
+    "lime_normal": (0, 255, 0),
+    "lime_dark": (50, 205, 50),
+    "lime_light": (204, 255, 204),
+    "teal_normal": (0, 128, 128),
+    "teal_dark": (0, 102, 102),
+    "teal_light": (128, 191, 191),
+    "navy_normal": (0, 0, 128),
+    "navy_dark": (0, 0, 102),
+    "navy_light": (173, 216, 230),
+    "white": (255,255,255)
+}
+
+
 
 
 
@@ -21,51 +68,6 @@ def rank_colours(image_name):
 
     # Color palette with RGB values
     # dictionary of colour codes
-    colour_codes = {
-        "red_normal": (255, 0, 0),
-        "red_dark": (139, 0, 0),
-        "red_light": (255, 102, 102),
-        "green_normal": (0, 128, 0),
-        "green_dark": (0, 100, 0),
-        "green_light": (144, 238, 144),
-        "blue_normal": (0, 0, 255),
-        "blue_dark": (0, 0, 139),
-        "blue_light": (173, 216, 230),
-        "yellow_normal": (255, 255, 0),
-        "yellow_dark": (204, 204, 0),
-        "yellow_light": (255, 255, 153),
-        "orange_normal": (255, 165, 0),
-        "orange_dark": (255, 140, 0),
-        "orange_light": (255, 200, 102),
-        "purple_normal": (128, 0, 128),
-        "purple_dark": (75, 0, 130),
-        "purple_light": (216, 191, 216),
-        "pink_normal": (255, 192, 203),
-        "pink_dark": (255, 105, 180),
-        "pink_light": (255, 182, 193),
-        "brown_normal": (165, 42, 42),
-        "brown_dark": (101, 67, 33),
-        "brown_light": (222, 184, 135),
-        "gray_normal": (128, 128, 128),
-        "gray_dark": (105, 105, 105),
-        "gray_light": (211, 211, 211),
-        "cyan_normal": (0, 255, 255),
-        "cyan_dark": (0, 139, 139),
-        "cyan_light": (224, 255, 255),
-        "magenta_normal": (255, 0, 255),
-        "magenta_dark": (139, 0, 139),
-        "magenta_light": (255, 153, 255),
-        "lime_normal": (0, 255, 0),
-        "lime_dark": (50, 205, 50),
-        "lime_light": (204, 255, 204),
-        "teal_normal": (0, 128, 128),
-        "teal_dark": (0, 102, 102),
-        "teal_light": (128, 191, 191),
-        "navy_normal": (0, 0, 128),
-        "navy_dark": (0, 0, 102),
-        "navy_light": (173, 216, 230),
-        "white": (255,255,255)
-    }
 
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
 
@@ -75,17 +77,6 @@ def rank_colours(image_name):
 
     # Build a k-d tree for fast nearest neighbor search
     colour_tree = cKDTree(colour_codes_array)
-
-
-
-
-
-
-
-
-
-
-
 
     colour_counter = Counter()
 
@@ -135,11 +126,7 @@ def rank_colours(image_name):
         colour_index = ranked_colour_ids[i]
         ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
 
-
-
-
     return ranked_colour_ids[:5]
-
 
 # print(rank_colours("IMG_0058.jpg"))
 
@@ -156,7 +143,56 @@ def rank_colours(image_name):
 
 
 
-def processUserImage(image_name,fixed_color_list):
+def processUserImage(fixed_json):
+    # Get the current script's directory
+    fixed_color_list = fixed_json['colours']
+    fixed_medium = fixed_json['medium']
+    favorite_style = None #retrieve from database
+
+    processed_image = []
+
+    if fixed_medium == "paints":
+        he_medium = [0,0,1]
+    elif fixed_medium == "pencilcrayons":
+        he_medium = [0,0,1] #0,1,0
+    else:
+        he_medium = [0,0,1] #1,0,0
+
+    for e in he_medium:
+        processed_image.append(e)
+
+
+    # Find 5 most prominent colours
+    colour_ranks = fixed_color_list
+    # Still need to convert into the one hot encoded
+    colour_ranks = [6,6,6,6,6]
+
+
+    for col in colour_ranks:
+        processed_image.append(col)
+    # appending one hot encoded colours
+
+    for i in range(7):
+        processed_image.append(0)
+    #this is style
+
+    print(processed_image)
+    SimilaritySearch(processed_image)
+
+
+# processUserImage("IMG_0058.jpg")
+
+
+
+
+
+
+
+
+
+
+
+def get_info(image_name):
     # Get the current script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -226,30 +262,23 @@ def processUserImage(image_name,fixed_color_list):
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
     # Find 5 most prominent colours
-    colour_ranks = fixed_color_list
-    #BUT WE NEED TO MAKE THESE BACK INTO THE INDEXES INSTEAD OF ACTUAL COLOR NAMES
+    colour_ranks = rank_colours(image_name)
 
 
     top_colours = np.array(colour_ranks[:5]).flatten()
 
-    # for col in range(len(top_colours)):
-    #     if top_colours[col] == 19:
-    #         top_colours[col] = 21
-    #     elif top_colours[col] >= 20:
-    #         top_colours[col] +=7
 
     if len(top_colours) < 5:
         # If fewer than 5 colours, repeat the most common colours to fill up the list
         top_colours += [top_colours[0]] * (5 - len(top_colours))
 
 
+    normal_list = []
     for col in top_colours:
-        processed_image.append(col)
-
-    for i in range(7):
-        processed_image.append(0)
-
-    SimilaritySearch(processed_image)
+        normal_list.append(col)
 
 
-# processUserImage("ob1.jpg")
+    # make sure top colours are string
+    return {'medium':predicted_label,"colours":normal_list,"style":[]}
+
+# print(processUserImage(get_info("blue.jpg")))
