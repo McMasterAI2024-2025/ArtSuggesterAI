@@ -141,7 +141,7 @@ def rank_colours(image_name):
 
 
 
-test_image = "redpaint.webp"
+test_image = "p1.jpeg"
 print(rank_colours(test_image), "\n")
 
 
