@@ -12,7 +12,7 @@ import CreateAccount from './pages/CreateAccount';
 function App() {
   //Favourite list updating
   const [numFavs, setNumFavs] = useState(0);
-    const [favourites, setFavorutites] = useState ([]);
+  const [favourites, setFavorutites] = useState ([]);
 
     function addFav (){
         setNumFavs(numFavs + 1);

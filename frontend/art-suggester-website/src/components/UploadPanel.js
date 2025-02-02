@@ -9,13 +9,29 @@ import { Navigate, useNavigate } from "react-router-dom";
 const UploadPanel = ({ closePanel, img_url } ) => {
   // States to hold the detected color information
   // this states should be retrieved from backend
-  const [detectedColors, setDetectedColors] = useState('{red, blue, yellow, ...}');
-  const [detectedMediums, setDetectedMediums] = useState('{pencil crayons, paint, marker, ...}');
+  const [detectedColors, setDetectedColors] = useState('red, blue, yellow, ...');
+  const [detectedMediums, setDetectedMediums] = useState('pencil crayons, paint, marker');
 
   const navigate = useNavigate();
   const HandleConfirm = () => {
+
+    //Send medium and color to backend
+    fetch("http://localhost:5000/sendMediumAndColor", {
+      method: "POST",
+      body: JSON.stringify({
+        mediums: detectedMediums,
+        colors: detectedColors,
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
+      }
+    }).catch((error) => console.log(error))
+      .then((response) => response.json()).catch((error) => console.log(error))
+      .then((json) => console.log(json)).catch((error) => console.log(error));
+
     console.log("Confirmed!");
     navigate("/suggested");
+  
   };
 
   return (
