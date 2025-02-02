@@ -21,7 +21,6 @@ stuff = collection.find({})
 for s in stuff:
     print (s)
 
-
 ##Add a user
 def addUser(email: str, password: str):
     userExists = collection.find_one({"email": email})
@@ -42,6 +41,14 @@ def login(email: str, password: str):
     return ("Success")
 
 #login("francis@gmail.com", 123)
+
+##Get favourites
+def getFavs(email: str):
+    userExists = collection.find_one({"email": email})
+    if userExists == None:
+        return None
+    favourites = userExists["favourites"]
+    return(favourites)
 
 def updateFavStyle(email: str, password: str, style: int):
     if login(email,password) == "Success":

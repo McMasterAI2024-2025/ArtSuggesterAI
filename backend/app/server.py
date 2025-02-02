@@ -87,7 +87,7 @@ def get_images(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-##Route to login
+##Route to register
 @app.post('/registerUser/<email>/<password>')
 def register(email, password):
     call = addUser(email, password)
@@ -96,14 +96,29 @@ def register(email, password):
         return jsonify("Error: email already taken"), 500
     return jsonify ("User added successfully"), 200
 
+
+##Route to login
 @app.post('/login/<email>/<password>')
 def userLogin(email, password):
     call = login(email, password)
-    if call == None:
-        return jsonify("Error: login unsuccessful"), 500
+    if call == "No User Found":
+        return jsonify("Error: No user found"), 404
+    elif call == "Wrong Password":
+        return jsonify("Error: Wrong password"), 401
     return jsonify ("Logged in successfully"), 200
 
 
+##Route to send updated mediums
+@app.post('/sendMediumAndColor')
+def sendMediumAndColor():
+    info = request.get_json()
+    print(info)
+    mediums = info["mediums"]
+    colors = info["colors"]
+    print(mediums, colors)
+    return jsonify ("Sent successfully"), 200
+
+    
 # Run program
 if __name__ == "__main__":
     app.run(debug=True)
