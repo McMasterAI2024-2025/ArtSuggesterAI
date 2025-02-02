@@ -66,6 +66,17 @@ colour_codes = {
 }
 
 
+def saturation_filter(img): 
+    img_hsv = np.array(img.convert('HSV')) # convert image to HSV then to a NumPy array
+
+    saturation = img_hsv.reshape(-1,3)[:,1] # flatten and retrieve saturation only
+
+    # boolean mask for top 10% highly saturated pixels 
+    threshold = np.percentile(saturation, 90) 
+    high_saturation_pixels = saturation >= threshold 
+
+    return high_saturation_pixels # return boolean mask ("True" for high saturation pixels)
+
 def rank_colours(image_name):
 
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
@@ -84,27 +95,33 @@ def rank_colours(image_name):
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
     img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
+    ### edge detection handling
     edge_pixels = np.vstack([
         img_array[:128],                   # Top edge
         img_array[-128:],                  # Bottom edge
         img_array[::128],                  # Left edge
         img_array[127::128]                # Right edge
     ])
-
     edge_distances, edge_indices = colour_tree.query(edge_pixels)
     edge_counter = Counter(edge_indices)
-
     # Determine dominant background colors
     background_threshold = 0.1 * len(img_array)  # Threshold for background exclusion
     background_colors = [
         idx for idx, count in edge_counter.items() if count > background_threshold
     ]
+    ###
 
     # Querey all pixels for colour mapping
     distances, indices = colour_tree.query(img_array)
 
+
+    # retrieve boolean mask for highly saturated pixels (true if high saturation)
+    high_saturation_pixels = saturation_filter(img)
+    # filter pixels by saturation using boolean mask
+    high_saturation_indices = indices[high_saturation_pixels]
+
     # Count occurrences, excluding background colors
-    for idx in indices:
+    for idx in high_saturation_indices:
         if idx not in background_colors:
             closest_colour = list(colour_codes.keys())[idx]
             colour_counter[closest_colour] += 1
