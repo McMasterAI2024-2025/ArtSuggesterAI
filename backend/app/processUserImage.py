@@ -141,28 +141,27 @@ def rank_colours(image_name):
 
     return ranked_colours[:5]
 
+def testingColourProcessing():
+    test_image = "m1.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "m1.jpeg"
-print(test_image, ": ", rank_colours(test_image), "\n")
+    test_image = "p1.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "p1.jpg"
-print(test_image, ": ", rank_colours(test_image), "\n")
+    test_image = "p3.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "p3.jpg"
-print(test_image, ": ", rank_colours(test_image), "\n")
+    test_image = "p5.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "p5.jpg"
-print(test_image, ": ", rank_colours(test_image), "\n")
+    test_image = "p7.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "p7.jpeg"
-print(test_image, ": ", rank_colours(test_image), "\n")
+    test_image = "p8.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-test_image = "p8.jpeg"
-print(test_image, ": ", rank_colours(test_image), "\n")
-
-test_image = "p9.jpeg"
-print(test_image, ": ", rank_colours(test_image), "\n")
-
+    test_image = "p9.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
 
 def processUserImage(image_name,fixed_color_list):
