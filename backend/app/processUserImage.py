@@ -71,8 +71,8 @@ def saturation_filter(img):
 
     saturation = img_hsv.reshape(-1,3)[:,1] # flatten and retrieve saturation only
 
-    # boolean mask for top 10% highly saturated pixels 
-    threshold = np.percentile(saturation, 90) 
+    # boolean mask for top 40% highly saturated pixels 
+    threshold = np.percentile(saturation, 60) 
     high_saturation_pixels = saturation >= threshold 
 
     return high_saturation_pixels # return boolean mask ("True" for high saturation pixels)
@@ -93,26 +93,29 @@ def rank_colours(image_name):
     img_array = np.array(img)
 
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
-    img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
+    flattened_img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
 
     ### edge detection handling
     edge_pixels = np.vstack([
-        img_array[:128],                   # Top edge
-        img_array[-128:],                  # Bottom edge
-        img_array[::128],                  # Left edge
-        img_array[127::128]                # Right edge
+        img_array[0, :, :],                   # Top edge
+        img_array[-1, :, :],                  # Bottom edge
+        img_array[:, 0, :],                   # Left edge
+        img_array[:, -1, :]                   # Right edge
     ])
     edge_distances, edge_indices = colour_tree.query(edge_pixels)
     edge_counter = Counter(edge_indices)
     # Determine dominant background colors
-    background_threshold = 0.05 * len(img_array)  # Threshold for background exclusion
+    background_threshold = 0.08 * len(edge_pixels)  # Threshold for background exclusion
     background_colors = [
         idx for idx, count in edge_counter.items() if count > background_threshold
     ]
+    # Map background color indices to actual color names
+    background_color_names = [list(colour_ids.keys())[idx] for idx in background_colors]
+    print("Background colors:", background_color_names)
     ###
 
     # Querey all pixels for colour mapping
-    distances, indices = colour_tree.query(img_array)
+    distances, indices = colour_tree.query(flattened_img_array)
 
 
     # retrieve boolean mask for highly saturated pixels (true if high saturation)
