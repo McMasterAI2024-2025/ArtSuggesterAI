@@ -105,7 +105,7 @@ def rank_colours(image_name):
     edge_distances, edge_indices = colour_tree.query(edge_pixels)
     edge_counter = Counter(edge_indices)
     # Determine dominant background colors
-    background_threshold = 0.1 * len(img_array)  # Threshold for background exclusion
+    background_threshold = 0.05 * len(img_array)  # Threshold for background exclusion
     background_colors = [
         idx for idx, count in edge_counter.items() if count > background_threshold
     ]
@@ -141,9 +141,14 @@ def rank_colours(image_name):
 
 
 
-test_image = "p1.jpeg"
-print(rank_colours(test_image), "\n")
+test_image = "p1.jpg"
+print(test_image, ": ", rank_colours(test_image), "\n")
 
+test_image = "p5.jpg"
+print(test_image, ": ", rank_colours(test_image), "\n")
+
+test_image = "p9.jpeg"
+print(test_image, ": ", rank_colours(test_image), "\n")
 
 
 
