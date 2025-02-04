@@ -107,6 +107,9 @@ def rank_colours(image_name):
     background_colors = [
         idx for idx, count in edge_counter.items() if count > background_threshold
     ]
+    # Ensure 'brown_normal' is always a background color by adding its index
+    if colour_ids["brown_normal"] not in background_colors:
+        background_colors.append(colour_ids["brown_normal"])
     # Map background color indices to actual color names
     background_color_names = [list(colour_ids.keys())[idx] for idx in background_colors]
     print("Background colors:", background_color_names)
@@ -160,7 +163,8 @@ def testingColourProcessing():
     test_image = "p9.jpeg"
     print(test_image, ": ", rank_colours(test_image), "\n")
 
-    
+testingColourProcessing()
+
 def processUserImage(fixed_json):
     # Get the current script's directory
     fixed_color_list = fixed_json['colours']
