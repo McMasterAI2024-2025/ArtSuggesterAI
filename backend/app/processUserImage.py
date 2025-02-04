@@ -11,6 +11,9 @@ from sklearn.cluster import KMeans
 from skimage.color import rgb2lab, deltaE_cie76
 from sklearn.cluster import KMeans
 from collections import Counter
+from skimage.color import rgb2lab, deltaE_cie76
+from sklearn.cluster import KMeans
+from similaritySearch import SimilaritySearch
 import cv2
 from similaritySearch import SimilaritySearch
 
@@ -61,26 +64,22 @@ colour_codes = {
 }
 
 
-
 def saturation_filter(img): 
     img_hsv = np.array(img.convert('HSV')) # convert image to HSV then to a NumPy array
 
     saturation = img_hsv.reshape(-1,3)[:,1] # flatten and retrieve saturation only
 
-    # boolean mask for top 10% highly saturated pixels 
-    threshold = np.percentile(saturation, 90) 
+    # boolean mask for top 50% highly saturated pixels 
+    threshold = np.percentile(saturation, 60) 
     high_saturation_pixels = saturation >= threshold 
 
     return high_saturation_pixels # return boolean mask ("True" for high saturation pixels)
 
-
 def rank_colours(image_name):
-    # Color palette with RGB values: dictionary of colour codes
 
     colour_ids = {name: idx for idx, name in enumerate(colour_codes)}
-    colour_codes_array = np.array(list(colour_codes.values()))     # Convert the colour_codes dict to a numpy array for faster computation
-    colour_tree = cKDTree(colour_codes_array)     # Build a k-d tree for fast nearest neighbor search
-
+    colour_codes_array = np.array(list(colour_codes.values()))
+    colour_tree = cKDTree(colour_codes_array)
     colour_counter = Counter()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -89,57 +88,79 @@ def rank_colours(image_name):
 
     img = Image.open(file_path).convert('RGB')
     img = img.resize((128, 128))
-    img_array = np.array(img)  # Convert to NumPy array
+    img_array = np.array(img)
 
     # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
-    img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
+    flattened_img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
+
+    ### edge detection handling
+    edge_pixels = np.vstack([
+        img_array[0, :, :],                   # Top edge
+        img_array[-1, :, :],                  # Bottom edge
+        img_array[:, 0, :],                   # Left edge
+        img_array[:, -1, :]                   # Right edge
+    ])
+    edge_distances, edge_indices = colour_tree.query(edge_pixels)
+    edge_counter = Counter(edge_indices)
+    # Determine dominant background colors
+    background_threshold = 0.08 * len(edge_pixels)  # Threshold for background exclusion
+    background_colors = [
+        idx for idx, count in edge_counter.items() if count > background_threshold
+    ]
+    # Map background color indices to actual color names
+    background_color_names = [list(colour_ids.keys())[idx] for idx in background_colors]
+    print("Background colors:", background_color_names)
+    ###
+
+    # Querey all pixels for colour mapping
+    distances, indices = colour_tree.query(flattened_img_array)
 
     # retrieve boolean mask for highly saturated pixels (true if high saturation)
     high_saturation_pixels = saturation_filter(img)
-
-    # Calculate the squared distance for each pixel to every color in the colour_codes
-    distances, indices = colour_tree.query(img_array)  # Query all pixels at once
-
     # filter pixels by saturation using boolean mask
     high_saturation_indices = indices[high_saturation_pixels]
 
-    # For each highly-saturated pixel, increment the count for the closest color
+    # Count occurrences, excluding background colors
     for idx in high_saturation_indices:
-        closest_colour = list(colour_codes.keys())[idx]
-        colour_counter[closest_colour] += 1
+        if idx not in background_colors:
+            closest_colour = list(colour_codes.keys())[idx]
+            colour_counter[closest_colour] += 1
 
-    # Sort the colours by frequency (most common first)
+    # Sort colors by frequency
     ranked_colour_ids = [colour_ids[colour] for colour, _ in colour_counter.most_common()]
 
     if len(ranked_colour_ids) < 5:
-        # If fewer than 5 colours, repeat the most common colours to fill up the list
         ranked_colour_ids += [ranked_colour_ids[0]] * (5 - len(ranked_colour_ids))
 
-    for i in range(len(ranked_colour_ids)):
-        # Reverse the colour_ids mapping
-        reverse_colour_ids = {v: k for k, v in colour_ids.items()}
+    # Reverse the colour_ids mapping
+    reverse_colour_ids = {v: k for k, v in colour_ids.items()}
+    ranked_colours = [reverse_colour_ids.get(colour_index) for colour_index in ranked_colour_ids]
 
-        # Example: if 23 is the most common colour
-        colour_index = ranked_colour_ids[i]
-        ranked_colour_ids[i] = reverse_colour_ids.get(colour_index)
+    return ranked_colours[:5]
 
-    return ranked_colour_ids[:5]
+def testingColourProcessing():
+    test_image = "m1.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-# print(rank_colours("IMG_0058.jpg"))
+    test_image = "p1.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
+    test_image = "p3.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
+    test_image = "p5.jpg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
+    test_image = "p7.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
+    test_image = "p8.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
+    test_image = "p9.jpeg"
+    print(test_image, ": ", rank_colours(test_image), "\n")
 
-
-
-
-
-
-
-
-
+    
 def processUserImage(fixed_json):
     # Get the current script's directory
     fixed_color_list = fixed_json['colours']
@@ -190,7 +211,6 @@ def processUserImage(fixed_json):
 
 
 # print(rank_colours("IMG_0058.jpg"))
-print(rank_colours("IMG_0056.jpg"))
 
 
 
@@ -256,17 +276,8 @@ def get_info(image_name):
 
     print(processed_image)
 
-
-    img = Image.open(file_path).convert('RGB')
-    img = img.resize((128, 128))
-    img_array = np.array(img)  # Convert to NumPy array
-
-    # Reshape the 3D array (128x128x3) into 2D array (128*128)x3
-    img_array = img_array.reshape(-1, 3)  # Flatten to (16384, 3)
-
     # Find 5 most prominent colours
     colour_ranks = rank_colours(image_name)
-
 
     top_colours = np.array(colour_ranks[:5]).flatten()
 
@@ -275,6 +286,7 @@ def get_info(image_name):
         # If fewer than 5 colours, repeat the most common colours to fill up the list
         top_colours += [top_colours[0]] * (5 - len(top_colours))
 
+    top_colours = np.array(colour_ranks).flatten()
 
     normal_list = []
     for col in top_colours:
