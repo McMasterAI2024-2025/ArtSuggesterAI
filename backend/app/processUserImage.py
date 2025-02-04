@@ -17,8 +17,6 @@ from similaritySearch import SimilaritySearch
 import cv2
 from similaritySearch import SimilaritySearch
 
-# Color palette with RGB values
-# dictionary of colour codes
 colour_codes = {
     "red_normal": (255, 0, 0),
     "red_dark": (139, 0, 0),
@@ -117,7 +115,6 @@ def rank_colours(image_name):
     # Querey all pixels for colour mapping
     distances, indices = colour_tree.query(flattened_img_array)
 
-
     # retrieve boolean mask for highly saturated pixels (true if high saturation)
     high_saturation_pixels = saturation_filter(img)
     # filter pixels by saturation using boolean mask
@@ -163,8 +160,62 @@ def testingColourProcessing():
     test_image = "p9.jpeg"
     print(test_image, ": ", rank_colours(test_image), "\n")
 
+    
+def processUserImage(fixed_json):
+    # Get the current script's directory
+    fixed_color_list = fixed_json['colours']
+    fixed_medium = fixed_json['medium']
+    favorite_style = None #retrieve from database
 
-def processUserImage(image_name,fixed_color_list):
+    processed_image = []
+
+    if fixed_medium == "paints":
+        he_medium = [0,0,1]
+    elif fixed_medium == "pencilcrayons":
+        he_medium = [0,0,1] #0,1,0
+    else:
+        he_medium = [0,0,1] #1,0,0
+
+    for e in he_medium:
+        processed_image.append(e)
+
+
+    # Find 5 most prominent colours
+    colour_ranks = fixed_color_list
+    # Still need to convert into the one hot encoded
+    colour_ranks = [6,6,6,6,6]
+
+
+    for col in colour_ranks:
+        processed_image.append(col)
+    # appending one hot encoded colours
+
+    for i in range(7):
+        processed_image.append(0)
+    #this is style
+
+    print(processed_image)
+    SimilaritySearch(processed_image)
+
+
+# processUserImage("IMG_0058.jpg")
+
+
+
+
+
+
+
+
+    #return ranked_colour_ids[:10]
+
+
+# print(rank_colours("IMG_0058.jpg"))
+
+
+
+
+def get_info(image_name):
     # Get the current script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -228,14 +279,21 @@ def processUserImage(image_name,fixed_color_list):
     # Find 5 most prominent colours
     colour_ranks = rank_colours(image_name)
 
+    top_colours = np.array(colour_ranks[:5]).flatten()
+
+
+    if len(top_colours) < 5:
+        # If fewer than 5 colours, repeat the most common colours to fill up the list
+        top_colours += [top_colours[0]] * (5 - len(top_colours))
 
     top_colours = np.array(colour_ranks).flatten()
 
+    normal_list = []
     for col in top_colours:
-        processed_image.append(col)
+        normal_list.append(col)
 
-    for i in range(7):
-        processed_image.append(0)
 
-    SimilaritySearch(processed_image)
+    # make sure top colours are string
+    return {'medium':predicted_label,"colours":normal_list,"style":[]}
 
+# print(processUserImage(get_info("blue.jpg")))
