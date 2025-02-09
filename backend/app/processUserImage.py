@@ -110,9 +110,10 @@ def rank_colours(image_name):
     # Ensure 'brown_normal' is always a background color by adding its index
     if colour_ids["brown_normal"] not in background_colors:
         background_colors.append(colour_ids["brown_normal"])
+    print("Background colors1:", background_colors)
     # Map background color indices to actual color names
     background_color_names = [list(colour_ids.keys())[idx] for idx in background_colors]
-    print("Background colors:", background_color_names)
+    print("Background colors2:", background_color_names)
     ###
 
     # Querey all pixels for colour mapping
@@ -163,7 +164,7 @@ def testingColourProcessing():
     test_image = "p9.jpeg"
     print(test_image, ": ", rank_colours(test_image), "\n")
 
-testingColourProcessing()
+# testingColourProcessing()
 
 def processUserImage(fixed_json):
     # Get the current script's directory
@@ -278,10 +279,11 @@ def get_info(image_name):
     for e in he_medium:
         processed_image.append(e)
 
-    print(processed_image)
+    print(processed_image, " here?")
 
     # Find 5 most prominent colours
     colour_ranks = rank_colours(image_name)
+    print("this is color ranks ", colour_ranks)
 
     top_colours = np.array(colour_ranks[:5]).flatten()
 
@@ -298,6 +300,7 @@ def get_info(image_name):
 
 
     # make sure top colours are string
+    # get the fav style
     return {'medium':predicted_label,"colours":normal_list,"style":[]}
 
-# print(processUserImage(get_info("blue.jpg")))
+print(get_info("p5.jpg"))

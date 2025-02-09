@@ -94,6 +94,7 @@ def register(email, password):
     #print(call)
     if call == None:
         return jsonify("Error: email already taken"), 500
+    print("register works")
     return jsonify ("User added successfully"), 200
 
 @app.post('/login/<email>/<password>')
