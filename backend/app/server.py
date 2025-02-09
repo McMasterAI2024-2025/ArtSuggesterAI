@@ -13,7 +13,7 @@ from sklearn.cluster import KMeans
 from skimage.color import rgb2lab, deltaE_cie76
 from similaritySearch import SimilaritySearch
 from scipy.spatial.distance import cdist
-from database import addUser, login
+from database import addUser, login, updateFavStyle, removeFavStyle, addFavImage, removeFavImage
 
 
 app = Flask(__name__)
@@ -103,6 +103,33 @@ def userLogin(email, password):
         return jsonify("Error: login unsuccessful"), 500
     return jsonify ("Logged in successfully"), 200
 
+@app.post('/updateFavStyle/<email>/<password>/<style>')
+def updateFavouriteStyle(email,password,style):
+    call = updateFavStyle(email,password,style)
+    if call == None:
+        return("Error: favourite style failed to update"), 500
+    return jsonify ("Style favourited succesfully"), 200
+
+@app.post('/removeFavStyle/<email>/<password>')
+def removeFavouriteStyle(email,password):
+    call = removeFavStyle(email,password)
+    if call == None:
+        return("Error: Style failed to unfavourite"), 500
+    return jsonify ("Style Unfavourited succesfully"), 200
+
+@app.post('/addFavImage/<email>/<password>/<img>')
+def addFavouriteImage(email,password,img):
+    call = addFavImage(email,password,img)
+    if call == None:
+        return("Error: Failed to add image to favourites"), 500
+    return jsonify ("Image added to favourites"), 200
+
+@app.post('/removeFavImage/<email>/<password>/<img>')
+def removeFavouriteImage(email,password,img):
+    call = removeFavImage(email,password,img)
+    if call == None:
+        return("Error: Failed to remove image from favourites"), 500
+    return jsonify ("Image removed from favourites"), 200
 
 # Run program
 if __name__ == "__main__":
