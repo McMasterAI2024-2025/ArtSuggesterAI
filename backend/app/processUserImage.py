@@ -188,7 +188,16 @@ def processUserImage(fixed_json):
     # Find 5 most prominent colours
     colour_ranks = fixed_color_list
     # Still need to convert into the one hot encoded
-    colour_ranks = [6,6,6,6,6]
+
+    index_colours_ranks = []
+    for col in colour_ranks:
+        index = 0
+        for c in colour_codes:
+            if c == col:
+                index_colours_ranks.append(index)
+            index += 1
+
+    colour_ranks = index_colours_ranks
 
 
     for col in colour_ranks:
@@ -303,4 +312,4 @@ def get_info(image_name):
     # get the fav style
     return {'medium':predicted_label,"colours":normal_list,"style":[]}
 
-print(get_info("p5.jpg"))
+# print(get_info("p5.jpg"))

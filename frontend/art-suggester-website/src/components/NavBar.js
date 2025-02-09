@@ -19,7 +19,7 @@ export default function NavBar() {
                     <li><a href="/about">About</a></li>
                 </ul>
                 <div className='user-section'>
-                    <a href="/login">Log In</a>
+                    <a href="/login">Log Out</a>
                     {/*<img src="/images/temp-pfp.jpg" alt="profile" className='nav-profile-pic' />*/}
                 </div>
             </nav>
