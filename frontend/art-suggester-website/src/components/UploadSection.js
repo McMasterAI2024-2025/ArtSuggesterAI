@@ -3,7 +3,7 @@ import DragNdrop from './DragNDrop';
 import React, { useState } from 'react';
 import CameraCapture from './CameraCapture';
 
-export default function UploadSection({ uploadFile, setUploadFile, panelOpen, setPanelOpen }) {
+export default function UploadSection({ uploadFile, setUploadFile, panelOpen, setPanelOpen, setUploadData }) {
 
     // webcam state control for showing and hiding the webcam preview
     const [showCamera, setShowCamera] = useState(false);
@@ -26,6 +26,7 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
             const result = await response.json();
             if (response.ok) {
                 console.log('File uploaded successfully:', result);
+                setUploadData(result); // You'll need to add this as a prop
             } else {
                 console.error('Upload failed:', result);
             }

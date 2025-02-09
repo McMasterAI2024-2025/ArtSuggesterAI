@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file, abort
 import os
 from flask_cors import CORS
-from processUserImage import processUserImage
+from processUserImage import processUserImage, get_info
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
@@ -32,7 +32,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def main():
     return {"message": "Welcome to the file upload server!"}
 
-# File upload route for backend
+# Initial file upload
 @app.route('/uploadFile', methods=['POST'])
 def upload_file():
     # Ensure the request has a file attached
@@ -52,10 +52,19 @@ def upload_file():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, file_path)
 
-    processUserImage(file_path)
+    initial_dic = get_info(file_path)
     
+    return jsonify(initial_dic), 200
 
-    return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
+@app.route('/confirmInfo', methods=['POST'])
+def confirm_info():
+    fixed_dict = request.json  # Get the data from the request
+    processUserImage(fixed_dict)
+    
+    return jsonify("Images Added!"), 200
+
+
+
 
 # Directory for suggested images
 SUGGESTED_IMAGES_DIR = 'returnImages'
@@ -86,6 +95,8 @@ def get_images(id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 ##Route to login
 @app.post('/registerUser/<email>/<password>')
