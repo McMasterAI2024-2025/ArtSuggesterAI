@@ -1,19 +1,12 @@
-from flask import Flask, request, jsonify, send_file, abort
+from flask import Flask, request, jsonify, send_file, abort, send_from_directory
 import os
 from flask_cors import CORS
 from processUserImage import processUserImage, get_info
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
-import numpy as np
-from collections import Counter
-from scipy.spatial import cKDTree
-from PIL import Image
-from sklearn.cluster import KMeans
-from skimage.color import rgb2lab, deltaE_cie76
-from similaritySearch import SimilaritySearch
-from scipy.spatial.distance import cdist
-from database import addUser, login, updateFavStyle, removeFavStyle, addFavImage, removeFavImage
+from database import (
+    addUser, login, updateFavStyle, removeFavStyle, 
+    addFavImage, removeFavImage, getFavImages
+) 
+
 
 
 app = Flask(__name__)
@@ -80,7 +73,7 @@ def get_images(id):
 
         # Check if the requested index exists
         if id < 0 or id >= len(image_array):
-            return jsonify({"error": "Image ID out of range"}), 404
+            return jsonify({"error": "index out of range"}), 404  # Respond with a special flag
 
         # Construct the file path
         image_to_send = image_array[id]
@@ -96,7 +89,14 @@ def get_images(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+@app.route('/getSuggestedImagesLength', methods=['GET'])
+def get_images_length():
+    try:
+        # Get the list of images in the directory
+        image_array = sorted(os.listdir(SUGGESTED_IMAGES_DIR))
+        return jsonify({"length": len(image_array)}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 ##Route to login
 @app.post('/registerUser/<email>/<password>')
@@ -129,19 +129,35 @@ def removeFavouriteStyle(email,password):
         return("Error: Style failed to unfavourite"), 500
     return jsonify ("Style Unfavourited succesfully"), 200
 
-@app.post('/addFavImage/<email>/<password>/<img>')
-def addFavouriteImage(email,password,img):
-    call = addFavImage(email,password,img)
-    if call == None:
-        return("Error: Failed to add image to favourites"), 500
-    return jsonify ("Image added to favourites"), 200
 
-@app.post('/removeFavImage/<email>/<password>/<img>')
-def removeFavouriteImage(email,password,img):
-    call = removeFavImage(email,password,img)
+
+@app.post('/addFavImage/<email>/<password>')
+def addFavouriteImage(email, password):
+    data = request.json
+    img = data.get('imageUrl')  # Get the image URL from the request body
+    call = addFavImage(email, password, img)
     if call == None:
-        return("Error: Failed to remove image from favourites"), 500
-    return jsonify ("Image removed from favourites"), 200
+        return jsonify({"error": "Failed to add image to favourites"}), 500
+    return jsonify({"message": "Image added to favourites"}), 200
+
+@app.post('/removeFavImage/<email>/<password>')
+def removeFavouriteImage(email, password):
+    data = request.json
+    img = data.get('imageUrl')  # Get the image URL from the request body
+    call = removeFavImage(email, password, img)
+    if call == None:
+        return jsonify({"error": "Failed to remove image from favourites"}), 500
+    return jsonify({"message": "Image removed from favourites"}), 200
+
+
+
+
+@app.get('/getFavImages/<email>/<password>')
+def getFavouriteImages(email, password):
+    images = getFavImages(email, password)
+    if images is None:
+        return jsonify("Error: Unauthorized access"), 403
+    return jsonify(images), 200
 
 # Run program
 if __name__ == "__main__":
