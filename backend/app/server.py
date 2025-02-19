@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file
 import os
 from flask_cors import CORS
 from processUserImage import processUserImage, get_info
-from database import addUser, login, updateFavStyle, removeFavStyle, getFavImages
+from database import addUser, login, updateFavStyle
 from flask_pymongo import PyMongo
 import gridfs
 from werkzeug.utils import secure_filename

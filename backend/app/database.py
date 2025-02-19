@@ -56,29 +56,3 @@ def removeFavStyle(email: str, password: str):
         return ("FavStyle cleared")
     return None
 
-#updateFavStyle("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
-#removeFavStyle("francis@gmail.com","ChrisPChicken")
-
-def getFavImages(email: str, password: str):
-    print("getFavImages: ", email, "@", password, ": ", login(email, password))
-
-    if login(email, password) == "Success":
-        user = collection.find_one({"email": email}, {"favourites": 1, "_id": 0})
-        if user:
-            return user.get("favourites", [])
-    return None
-    
-def addFavImage(email: str, password: str, img: str):
-    if login(email, password) == "Success":
-        collection.update_one({"email": email}, {"$addToSet": {"favourites": img}})
-        return ("Favourite image added")
-    return None
-
-def removeFavImage(email: str, password: str, img: str):
-    if login(email, password) == "Success":
-        collection.update_one({"email": email}, {"$pull": {"favourites": img}})
-        return ("Image removed from favourites")
-    return None
-
-#addFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
-#removeFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
