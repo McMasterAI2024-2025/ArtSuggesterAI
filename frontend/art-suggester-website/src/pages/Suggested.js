@@ -1,6 +1,3 @@
-/*
- * Johann Caancan
- */
 import "./Suggested.css"
 import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
@@ -11,98 +8,101 @@ import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
 export default function Suggested() {
     const [suggested, setSuggested] = useState([]);
     const [favourites, setFavourites] = useState([]);
-    const userEmail = "test@example.com"; // Replace with actual logged-in user email
-    const userPassword = "password"; // Replace with actual logged-in user password
+    const userEmail = "test"; // Replace with actual logged-in user email
+    const userPassword = "test"; // Replace with actual logged-in user password
 
     useEffect(() => {
         fetchSuggestedImages();
         fetchFavourites();
-        
-        // temp
-        console.log(`Favourites: ${favourites}`);
     }, []);
 
     function fetchSuggestedImages() {
-        let images = [];
-        let index = 0;
-
-        // Fetch the length of suggested images from the backend
         fetch("http://localhost:5000/getSuggestedImagesLength")
             .then(response => response.json())
             .then(data => {
                 const totalImages = data.length;
-                console.log("Total images available:", totalImages);
-
-                // Now fetch images one by one based on the total count
-                function fetchNextImage() {
-                    if (index >= totalImages) {
-                        console.log("All images have been fetched.");
-                        return; // Stop if we've reached the total number of images
-                    }
-
-                    fetch(`http://localhost:5000/suggestedImages/${index}`)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            const imgUrl = URL.createObjectURL(blob);
-                            images.push(imgUrl);
-                            setSuggested([...images]); // Update state
-
-                            index++; // Move to the next image index
-                            fetchNextImage(); // Recursively fetch next image
-                        })
-                        .catch(error => {
-                            console.error("Error fetching suggested images:", error);
-                        });
+                const imagePromises = [];
+    
+                for (let index = 0; index < totalImages; index++) {
+                    imagePromises.push(
+                        fetch(`http://localhost:5000/suggestedImages/${index}`)
+                            .then(response => {
+                                const filename = response.headers.get('X-Filename');
+                                //console.log("Fetched image filename:", filename); // Debugging
+    
+                                return response.blob().then(blob => {
+                                    return { filename: filename || `image_${index}`, url: URL.createObjectURL(blob) };
+                                });
+                            })
+                    );
                 }
 
-                fetchNextImage(); // Start fetching images
+                Promise.all(imagePromises).then(images => {
+                    console.log("Final suggested images array:", images); // Debugging
+                    setSuggested(images);
+                });
             })
-            .catch(error => {
-                console.error("Error fetching images length:", error);
-            });
+            .catch(error => console.error("Error fetching suggested images:", error));
     }
 
     function fetchFavourites() {
-        fetch(`http://localhost:5000/getFavImages/${userEmail}/${userPassword}`)
-            .then(response => response.json())
-            .then(data => {
-                setFavourites(data);
-            })
-            .catch(error => console.error("Error fetching favourites:", error));
+        fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched favourites:", data);
+
+            if (data.error) {
+                console.error("Error:", data.error);
+                return;
+            }
+
+            // Extract filenames only
+            const filenames = data.favourites;
+            setFavourites(filenames);
+        })
+        .catch(error => console.error("Error fetching favourites:", error));
     }
 
-    function toggleFavourite(img) {
-        let updatedFavourites;
-        const imageUrl = encodeURIComponent(img);  // Encode image URL properly
-    
-        if (favourites.includes(img)) {
-            updatedFavourites = favourites.filter(fav => fav !== img);
-            // Sending the image URL in the request body as JSON
-            fetch(`http://localhost:5000/removeFavImage/${userEmail}/${userPassword}`, {
+    function toggleFavourite(filename) {
+        if (favourites.includes(filename)) {
+            // Remove from favourites
+            fetch(`http://localhost:5000/removeFavImage`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ imageUrl: imageUrl })  // Sending image URL in the body
-            });
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error removing favorite:", data.error);
+                    return;
+                }
+                setFavourites(favourites.filter(fav => fav !== filename));
+            })
+            .catch(error => console.error("Error removing favorite:", error));
         } else {
-            updatedFavourites = [...favourites, img];
-            // Sending the image URL in the request body as JSON
-            fetch(`http://localhost:5000/addFavImage/${userEmail}/${userPassword}`, {
+            // Add to favourites
+            fetch(`http://localhost:5000/addFavImage`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ imageUrl: imageUrl })  // Sending image URL in the body
-            });
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error adding favorite:", data.error);
+                    return;
+                }
+                setFavourites([...favourites, filename]);
+            })
+            .catch(error => console.error("Error adding favorite:", error));
         }
-        setFavourites(updatedFavourites);
     }
 
     function downloadImage(imgUrl) {
         const link = document.createElement("a");
         link.href = imgUrl;
-        link.download = "image.jpg";
+        link.download = "suggested_image.jpg";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -113,30 +113,26 @@ export default function Suggested() {
             <NavBar />
             <h2>Suggested Page</h2>
             <div className="main">
-                <ul className = 'favourites'>
-                    {suggested.map ((img, index) => {
-                        return (
-                            <div className="favItem" key={index}>
-                                <img src={img} alt="Suggested" className="img"/>
-                                <div className="icons">
-                                    <FontAwesomeIcon 
-                                        icon={faDownload} 
-                                        className="download" 
-                                        onClick={() => downloadImage(img)}
-                                    />
-                                    <FontAwesomeIcon 
-                                        icon={favourites.includes(img) ? faStar : faStarOutline} 
-                                        className="star" 
-                                        onClick={() => toggleFavourite(img)}
-                                    />
-                                </div>
+                <ul className='favourites'>
+                    {suggested.map(({ filename, url }) => (
+                        <div className="favItem" key={filename}>
+                            <img src={url} alt="Suggested" className="img"/>
+                            <div className="icons">
+                                <FontAwesomeIcon 
+                                    icon={faDownload} 
+                                    className="download" 
+                                    onClick={() => downloadImage(url)}
+                                />
+                                <FontAwesomeIcon 
+                                    icon={favourites.includes(filename) ? faStar : faStarOutline} 
+                                    className="star" 
+                                    onClick={() => toggleFavourite(filename)}
+                                />
                             </div>
-                        )
-                    })}
+                        </div>
+                    ))}
                 </ul>
             </div>
-            
-            
         </>
     );
 };

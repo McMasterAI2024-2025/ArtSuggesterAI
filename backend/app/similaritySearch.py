@@ -6,10 +6,14 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from PIL import Image
 import os
+import uuid
 
 def SimilaritySearch(input_array):
     # get the current script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # unique identifier for set of images
+    identifier = str(uuid.uuid4())
     
     # load preprocessed image data from file
     data_base = os.path.join(script_dir, "data_np.npz")
@@ -94,7 +98,7 @@ def SimilaritySearch(input_array):
         # save the image
         output_folder = "returnImages"
         os.makedirs(output_folder, exist_ok=True)  # create the folder if it doesn't exist
-        output_path = os.path.join(output_folder, f"image_{i}.png")
+        output_path = os.path.join(output_folder, f"{identifier}_{i}.png")
         image.save(output_path)
 
         print(f"Image saved to {output_path}")

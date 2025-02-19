@@ -1,20 +1,21 @@
-import "./Favourites.css"
+import "./Favourites.css";
 import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faStar } from '@fortawesome/free-solid-svg-icons'
+import { faDownload, faStar, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
 
 export default function Favourites({ userEmail, userPassword }) {
-    const [favourites, setFavourites] = useState([]);  // State for favourites
+    const [favourites, setFavourites] = useState([]);
 
     // Fetch the user's favourites when the component mounts
     useEffect(() => {
         const fetchFavourites = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getFavImages/${userEmail}/${userPassword}`);
+                const response = await fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`);
                 const data = await response.json();
                 if (response.ok) {
-                    setFavourites(data);  // Set the favourites from the response
+                    console.log(data);
+                    setFavourites(data.favourites);
                 } else {
                     console.error("Failed to fetch favourites:", data);
                 }
@@ -23,35 +24,30 @@ export default function Favourites({ userEmail, userPassword }) {
             }
         };
         fetchFavourites();
-    }, [userEmail, userPassword]);  // Dependencies to refetch on email/password change
+    }, [userEmail, userPassword]);
 
-    // Function to handle removing a favourite
-    const delFav = async (index) => {
-        const favImage = favourites[index];
-        try {
-            const response = await fetch(`http://localhost:5000/removeFavImage/${userEmail}/${userPassword}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ imageUrl: favImage })  // Send image URL in the body
-            });
-
-            if (response.ok) {
-                const updatedFavourites = favourites.filter((fav, i) => i !== index);
-                setFavourites(updatedFavourites);  // Update the state after removal
-            } else {
-                console.error("Failed to remove favourite");
+    const delFav = async (filename) => {
+        fetch(`http://localhost:5000/removeFavImage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error removing favorite:", data.error);
+                return;
             }
-        } catch (error) {
-            console.error("Error removing favourite:", error);
-        }
+            setFavourites(favourites.filter(fav => fav.filename !== filename));
+        })
+        .catch(error => console.error("Error removing favorite:", error));
     };
 
-    function downloadImage(imgUrl) {
+    function downloadImage(file_id) {
+        const imgUrl = `http://localhost:5000/serveImage/${file_id}`;
         const link = document.createElement("a");
         link.href = imgUrl;
-        link.download = "favourite.jpg";
+        link.download = "favourite_image.jpg";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -60,21 +56,35 @@ export default function Favourites({ userEmail, userPassword }) {
     return (
         <>
             <NavBar />
-            <h2>Favourites Page</h2>
+            <h2>Favourites</h2>
             <div className="main">
-                <ul className='favourites'>
-                    {favourites.map((favItem, index) => {
-                        return (
+                {favourites.length > 0 ? (
+                    <ul className="favourites">
+                        {favourites.map((favItem, index) => (
                             <div className="favItem" key={index}>
-                                <img src={favItem} alt="favourite" className="img" />
+                                <img 
+                                    src={`http://localhost:5000/serveImage/${favItem.file_id}`} 
+                                    alt="favourite" 
+                                    className="img" 
+                                />
                                 <div className="icons">
-                                    <FontAwesomeIcon icon={faDownload} className="download" onClick={ downloadImage(favItem) }/>
-                                    <FontAwesomeIcon icon={faStar} className="star" onClick={() => { delFav(index) }} />
+                                    <FontAwesomeIcon 
+                                        icon={faDownload} 
+                                        className="download" 
+                                        onClick={() => downloadImage(favItem.file_id)} 
+                                    />
+                                    <FontAwesomeIcon 
+                                        icon={faStar} 
+                                        className="star" 
+                                        onClick={() => delFav(favItem.filename)} 
+                                    />
                                 </div>
                             </div>
-                        );
-                    })}
-                </ul>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No favourites found.</p>
+                )}
             </div>
         </>
     );
