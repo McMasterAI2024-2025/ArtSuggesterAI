@@ -190,9 +190,12 @@ def get_fav_images():
             return jsonify({"error": "Invalid login"}), 403
 
         # Find all favourite images stored in GridFS for this user
+        print("retrieving favs! ",email)
         fav_images = fs.find({"user_email": email})
+        print("this is fav ",fav_images)
         images = []
         for file in fav_images:
+            print("file = ",file)
             # Read the file from GridFS
             image_data = file.read()
             

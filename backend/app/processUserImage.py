@@ -1,6 +1,14 @@
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.models import load_model, Model
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, Input
+from tensorflow.keras import models, layers
+import numpy as np
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+
+import numpy as np
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import numpy as np
 import os
 from collections import Counter
@@ -237,13 +245,47 @@ def get_info(image_name):
     file_path = os.path.join(uploads_dir, image_name)
 
 
-    # Check for the model file
-    model_path = 'models/model_80_Acc.keras'
 
 
-    # Load the trained model
-    model = load_model(model_path)
-    print("Loaded model")
+
+    def create_model():
+        model = models.Sequential()
+
+        # Convolutional Block 1
+        model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(256, 256, 3)))
+        model.add(layers.MaxPooling2D((2, 2), strides=2))
+
+        # Convolutional Block 2
+        model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+        model.add(layers.MaxPooling2D((2, 2), strides=2))
+
+        # Convolutional Block 3
+        model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
+        model.add(layers.MaxPooling2D((2, 2), strides=2))
+
+        # Flatten and Fully Connected Layer
+        model.add(layers.Flatten())
+        model.add(layers.Dense(128, activation='relu'))
+        model.add(layers.Dropout(0.5))  # Dropout for regularization
+
+        # Output Layer
+        model.add(layers.Dense(3, activation='softmax'))  # Output for 3 classes
+
+        return model
+
+    # Create the model
+    model = create_model()
+
+    # Load the saved weights
+    weights_path = 'models/model_with_dropout_95_new_data_acc_weights_small_model.weights.h5'
+    model.load_weights(weights_path)
+    print("Loaded model weights successfully")
+
+    # Now proceed with predictions as before
+
+
+
+
 
 
     print("\nModel input shape:", model.input_shape)
@@ -252,7 +294,7 @@ def get_info(image_name):
     categories = {'markers': 0, 'pencilcrayons': 1, 'paints': 2}
 
     # Preprocess the image
-    img = load_img(file_path, target_size=(128, 128))
+    img = load_img(file_path, target_size=(256, 256))
     img_array = img_to_array(img)
     img_array = img_array / 255.0  # Normalize pixel values to [0, 1]
     img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
