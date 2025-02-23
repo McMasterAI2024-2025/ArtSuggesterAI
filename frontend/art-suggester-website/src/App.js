@@ -32,8 +32,7 @@ function App() {
         <Routes>
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/favourites" element={<Favourites numFavs = {numFavs} setNumFavs = {setNumFavs} addFav = {addFav}
-                                              setFavorutites = {setFavorutites} favourites = {favourites} delFav = {delFav}/>} />
+          <Route path="/favourites" element={<Favourites userEmail={"test"} userPassword={"test"} />} />
           <Route path="/suggested" element={<Suggested />} />
           <Route path = "/createAccount" element={<CreateAccount/>} />
           <Route path="*" element={<NoPage />} />

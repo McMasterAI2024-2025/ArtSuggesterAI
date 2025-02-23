@@ -1,28 +1,41 @@
-from flask import Flask, request, jsonify, send_file, abort
+from flask import Flask, request, jsonify, send_file
 import os
 from flask_cors import CORS
 from processUserImage import processUserImage, get_info
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
-import numpy as np
-from collections import Counter
-from scipy.spatial import cKDTree
-from PIL import Image
-from sklearn.cluster import KMeans
-from skimage.color import rgb2lab, deltaE_cie76
-from similaritySearch import SimilaritySearch
-from scipy.spatial.distance import cdist
-from database import addUser, login, updateFavStyle, removeFavStyle, addFavImage, removeFavImage
-
+from database import addUser, login, updateFavStyle
+from flask_pymongo import PyMongo
+import gridfs
+from werkzeug.utils import secure_filename
+from bson import ObjectId
+from io import BytesIO
+import shutil
+import base64
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, expose_headers=["X-Filename"])  # Enable CORS for all routes
+
+MONGODB_URI = "mongodb+srv://j:j@cluster0.jry9m.mongodb.net/artSuggester?retryWrites=true&w=majority"
+
+app.config["MONGO_URI"] = MONGODB_URI
+mongo = PyMongo(app)
+
+# Use the correct database
+db = mongo.db  # This automatically connects to the default database in the URI
+fs = gridfs.GridFS(db)  # GridFS instance for handling images
+collection = db["users"]  # Reference to the users collection
+
+
+
 
 # Find/create upload folder
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+# Directory for suggested images
+SUGGESTED_IMAGES_DIR = 'returnImages'
+if not os.path.exists(SUGGESTED_IMAGES_DIR):
+    os.makedirs(SUGGESTED_IMAGES_DIR)
 
 # Set the folder where files (images) will be uploaded to
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -45,6 +58,11 @@ def upload_file():
     # No empty name files
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
+    
+    # Clear the SUGGESTED_IMAGES_DIR directory
+    if os.path.exists(SUGGESTED_IMAGES_DIR):
+        shutil.rmtree(SUGGESTED_IMAGES_DIR)  # Remove the directory and its contents
+    os.makedirs(SUGGESTED_IMAGES_DIR)  # Recreate the directory
 
     # Save the file to the directory
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -63,40 +81,31 @@ def confirm_info():
     
     return jsonify("Images Added!"), 200
 
-
-
-
-# Directory for suggested images
-SUGGESTED_IMAGES_DIR = 'returnImages'
-if not os.path.exists(SUGGESTED_IMAGES_DIR):
-    os.makedirs(SUGGESTED_IMAGES_DIR)
-
 ##Route to send favourite images to frontend
 @app.route('/suggestedImages/<int:id>', methods=['GET'])
 def get_images(id):
     try:
-        # Get the list of images in the directory
         image_array = sorted(os.listdir(SUGGESTED_IMAGES_DIR))
 
-        # Check if the requested index exists
         if id < 0 or id >= len(image_array):
-            return jsonify({"error": "Image ID out of range"}), 404
-
-        # Construct the file path
+            return jsonify({"error": "index out of range"}), 404
+        
         image_to_send = image_array[id]
         file_path = os.path.join(SUGGESTED_IMAGES_DIR, image_to_send)
 
-        file_path = os.path.join(SUGGESTED_IMAGES_DIR, image_to_send)
-        print("Trying to serve file:", file_path)
-
-
-        # Serve the image file
-        return send_file(file_path)
-
+        response = send_file(file_path)
+        response.headers['X-Filename'] = image_to_send
+        return response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+@app.route('/getSuggestedImagesLength', methods=['GET'])
+def get_images_length():
+    try:
+        image_array = sorted(os.listdir(SUGGESTED_IMAGES_DIR))
+        return jsonify({"length": len(image_array)}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 ##Route to login
 @app.post('/registerUser/<email>/<password>')
@@ -122,27 +131,92 @@ def updateFavouriteStyle(email,password,style):
         return("Error: favourite style failed to update"), 500
     return jsonify ("Style favourited succesfully"), 200
 
-@app.post('/removeFavStyle/<email>/<password>')
-def removeFavouriteStyle(email,password):
-    call = removeFavStyle(email,password)
-    if call == None:
-        return("Error: Style failed to unfavourite"), 500
-    return jsonify ("Style Unfavourited succesfully"), 200
 
-@app.post('/addFavImage/<email>/<password>/<img>')
-def addFavouriteImage(email,password,img):
-    call = addFavImage(email,password,img)
-    if call == None:
-        return("Error: Failed to add image to favourites"), 500
-    return jsonify ("Image added to favourites"), 200
 
-@app.post('/removeFavImage/<email>/<password>/<img>')
-def removeFavouriteImage(email,password,img):
-    call = removeFavImage(email,password,img)
-    if call == None:
-        return("Error: Failed to remove image from favourites"), 500
-    return jsonify ("Image removed from favourites"), 200
+@app.route('/addFavImage', methods=['POST'])
+def add_fav_image():
+    try:
+        data = request.json
+        email = data.get("email")
+        password = data.get("password")
+        filename = data.get("filename")
 
-# Run program
+        if login(email, password) != "Success":
+            return jsonify({"error": "Unauthorized"}), 403
+        
+        image_path = os.path.join(SUGGESTED_IMAGES_DIR, filename)
+        
+        if not os.path.exists(image_path):
+            return jsonify({"error": "Image not found"}), 404
+        
+        with open(image_path, "rb") as f:
+            file_id = fs.put(f, filename=filename, user_email=email)
+
+        return jsonify({"message": "Favourite added", "file_id": str(file_id)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/removeFavImage', methods=['POST'])
+def remove_fav_image():
+    try:
+        data = request.json
+        email = data.get("email")
+        password = data.get("password")
+        filename = data.get("filename")
+
+        # Authenticate user
+        if login(email, password) != "Success":
+            return jsonify({"error": "Unauthorized"}), 403
+
+        # Find and delete the file from GridFS
+        fav_file = fs.find_one({"filename": filename, "user_email": email})
+
+        if fav_file:
+            fs.delete(fav_file._id)
+            return jsonify({"message": "Favourite removed"}), 200
+        else:
+            return jsonify({"error": "Image not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.get('/getFavImages')
+def get_fav_images():
+    try:
+        # Get email & password from query parameters
+        email = request.args.get("email")
+        password = request.args.get("password")
+        # Authenticate user
+        if login(email, password) != "Success":
+            return jsonify({"error": "Invalid login"}), 403
+
+        # Find all favourite images stored in GridFS for this user
+        fav_images = fs.find({"user_email": email})
+        images = []
+        for file in fav_images:
+            # Read the file from GridFS
+            image_data = file.read()
+            
+            # Convert image data to Base64
+            encoded_image = base64.b64encode(image_data).decode("utf-8")
+            
+            images.append({
+                "filename": file.filename,
+                "file_id": str(file._id),
+                "image_data": f"data:image/jpeg;base64,{encoded_image}"  # Frontend-ready Base64 string
+            })
+
+        return jsonify({"favourites": images}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.get('/serveImage/<file_id>')
+def serve_image(file_id):
+    try:
+        file_data = fs.get(ObjectId(file_id))
+        return send_file(BytesIO(file_data.read()), mimetype="image/jpeg")
+    except gridfs.errors.NoFile:
+        return jsonify({"error": "Image not found"}), 404
+
+
 if __name__ == "__main__":
     app.run(debug=True)

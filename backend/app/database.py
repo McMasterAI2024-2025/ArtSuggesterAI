@@ -27,21 +27,21 @@ def addUser(email: str, password: str):
     userExists = collection.find_one({"email": email})
     print(userExists)
     if userExists == None:
-        collection.insert_one({"email": email, "password": password, "favourites": [], "favStyle": [0,0,0,0,0]}) 
+        collection.insert_one({
+            "email": email, 
+            "password": password, 
+            "favourites": [], 
+            "favStyle": [0,0,0,0,0]
+        }) 
         return ("Added")
     return None
 
 ##Try to login
 def login(email: str, password: str):
-    userExists = collection.find_one({"email": email})
-    if userExists == None:
+    user = collection.find_one({"email": email})
+    if not user or user["password"] != password:
         return None
-    realPassword = userExists["password"]
-    if realPassword != password:
-        return None
-    return ("Success")
-
-#login("francis@gmail.com", 123)
+    return "Success"
 
 def updateFavStyle(email: str, password: str, style: int):
     if login(email,password) == "Success":
@@ -56,23 +56,3 @@ def removeFavStyle(email: str, password: str):
         return ("FavStyle cleared")
     return None
 
-#updateFavStyle("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
-#removeFavStyle("francis@gmail.com","ChrisPChicken")
-
-def addFavImage(email: str, password: str, img: int):
-    if login(email,password) == "Success":
-        collection.update_one({"email": email}, {"$push": {"favourites": img}})
-        return ("Favourite image added")
-    return None
-
-def removeFavImage(email: str, password: str, img: int):
-    if login(email,password) == "Success":
-        imgExists = collection.find_one({"email": email, "favourites": {"$in": [img]}})
-        if imgExists == None: 
-            return None
-        collection.update_one({"email": email}, {"$pull": {"favourites": img}})
-        return ("Image removed from favourites")
-    return None
-
-#addFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])
-#removeFavImage("francis@gmail.com","ChrisPChicken" , [0,1,1,0,0])

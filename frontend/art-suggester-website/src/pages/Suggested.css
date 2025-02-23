@@ -58,17 +58,19 @@
 
 .download{
    color: var(--accent);
-   width: 45%;
+   width: 100%;
    height:100%;
    margin-right: 5%;
+   cursor: pointer;
 }
 
 .star{
    color: var(--accent);
-   width: 45%;
+   width: 100%;
    height:100%;
    margin-left: 5%;
-   float:right
+   float:right;
+   cursor: pointer;
 }
 
 .download:hover{
