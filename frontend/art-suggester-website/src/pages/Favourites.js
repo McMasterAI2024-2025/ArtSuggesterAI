@@ -1,17 +1,27 @@
 import "./Favourites.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import NavBar from "../components/NavBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faStar, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
+import { AuthContext } from '../AuthContext';
+import { useNavigate } from "react-router-dom";
 
-export default function Favourites({ userEmail, userPassword }) {
+export default function Favourites() {
     const [favourites, setFavourites] = useState([]);
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     // Fetch the user's favourites when the component mounts
     useEffect(() => {
+        // Redirect to login page if user is not logged in
+        if (!user) { 
+            navigate("/login");
+            return;
+        }
+        
         const fetchFavourites = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`);
+                const response = await fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(user.email)}&password=${encodeURIComponent(user.password)}`);
                 const data = await response.json();
                 if (response.ok) {
                     console.log(data);
@@ -24,13 +34,13 @@ export default function Favourites({ userEmail, userPassword }) {
             }
         };
         fetchFavourites();
-    }, [userEmail, userPassword]);
+    }, [user, navigate]);
 
     const delFav = async (filename) => {
         fetch(`http://localhost:5000/removeFavImage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+            body: JSON.stringify({ email: user.email, password: user.password, filename })
         })
         .then(response => response.json())
         .then(data => {
