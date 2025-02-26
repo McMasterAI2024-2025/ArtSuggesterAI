@@ -1,19 +1,13 @@
-/*
- * Harrison Johns
- */
-
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import NavBar from "../components/NavBar";
 import UploadSection from "../components/UploadSection";
 import './Home.css';
 import UploadPanel from "../components/UploadPanel";
 
 export default function Home() {
-
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadPanelOpen, setUploadPanelOpen] = useState(false);
-    const [uploadData, setUploadData] = useState(null);  // Add this state
+    const [uploadData, setUploadData] = useState(null);
 
     return (
         <>

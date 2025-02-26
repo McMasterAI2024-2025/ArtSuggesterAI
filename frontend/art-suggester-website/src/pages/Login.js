@@ -1,8 +1,6 @@
-/*
- * Johann Caancan
- */
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom"; 
+import { AuthContext } from "../AuthContext";
 import NavBar from "../components/NavBar";
 import './Login.css';
 
@@ -10,7 +8,8 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
-    const navigate = useNavigate(); // Initialize useNavigate for redirection
+    const navigate = useNavigate();
+    const { login } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
         e.preventDefault(); // Prevent form submission
@@ -28,6 +27,10 @@ export default function Login() {
 
             if (response.status === 200) {
                 setMessage("Login successful!");
+
+                // Store user data in the context
+                login({ email, password });
+
                 // Redirect to the home page or dashboard after 2 seconds
                 setTimeout(() => {
                     navigate("/"); // Replace "/" with the desired route after login

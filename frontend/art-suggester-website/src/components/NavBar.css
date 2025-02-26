@@ -52,4 +52,13 @@
 
 .user-section {
   padding-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.user-section button {
+  width: fit-content;
+  padding: 5px 10px;
+  font-size: .9rem;
+  margin: 0;
 }
