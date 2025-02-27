@@ -1,5 +1,4 @@
-
-  /* Styling for the panel */
+ /* Styling for the panel */
   .upload-details-panel {
     background-color: var(--alt-background);
     color: var(--content);
@@ -13,10 +12,27 @@
     text-align: left;
   }
 
+  .color-select{
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .color-select label{
+    margin-right: 5px;
+  }
+  
+  .color-select select{
+    width: 25%;
+    margin-right: 5px;
+  }
+
+
+
   .upload-top-row {
     width: 100%;
     display: flex;
     justify-content: space-between;
+    height: 40px;
   }
   
   .panel-title {

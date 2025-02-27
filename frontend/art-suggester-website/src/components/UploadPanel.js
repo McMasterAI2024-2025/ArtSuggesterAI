@@ -14,6 +14,11 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
   const [detectedMediums, setDetectedMediums] = useState(
     uploadData?.medium || '{pencil crayons, paint, marker, ...}'
   );
+  const [c1,setC1] = useState("None");
+  const [c2,setC2] = useState("None");
+  const [c3,setC3] = useState("None");
+  const [c4,setC4] = useState("None");
+  const [c5,setC5] = useState("None");
 
   // Update states when uploadData changes
   useEffect(() => {
@@ -72,6 +77,144 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
       
       <div className="upload-details-columns">
         <div>
+          <div className="color-select">
+            <label for="c1">Color 1</label>
+            <select id="c1" name="c1" className = "color">
+                <option value="">(None)</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="brown">Brown</option>
+                <option value="gray">Gray</option>
+                <option value="cyan">Cyan</option>
+                <option value="magenta">Magenta</option>
+                <option value="lime">Lime</option>
+                <option value="teal">Teal</option>
+                <option value="navy">Navy</option>
+                <option value="white">White</option>
+            </select>
+            <select id="modeSelect1">
+                <option value="normal">Normal</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+
+        <div className="color-select">
+            <label for="c2">Color 2</label>
+            <select id="c2" name="c2">
+                <option value="">(None)</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="brown">Brown</option>
+                <option value="gray">Gray</option>
+                <option value="cyan">Cyan</option>
+                <option value="magenta">Magenta</option>
+                <option value="lime">Lime</option>
+                <option value="teal">Teal</option>
+                <option value="navy">Navy</option>
+                <option value="white">White</option>
+            </select>
+            <select id="modeSelect2">
+                <option value="normal">Normal</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+
+        <div className="color-select">
+            <label for="c3">Color 3</label>
+            <select id="c3" name="c3">
+                <option value="">(None)</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="brown">Brown</option>
+                <option value="gray">Gray</option>
+                <option value="cyan">Cyan</option>
+                <option value="magenta">Magenta</option>
+                <option value="lime">Lime</option>
+                <option value="teal">Teal</option>
+                <option value="navy">Navy</option>
+                <option value="white">White</option>
+            </select>
+            <select id="modeSelect3">
+                <option value="normal">Normal</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+
+        <div className="color-select">
+            <label for="c4">Color 4</label>
+            <select id="c4" name="c4">
+                <option value="">(None)</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="brown">Brown</option>
+                <option value="gray">Gray</option>
+                <option value="cyan">Cyan</option>
+                <option value="magenta">Magenta</option>
+                <option value="lime">Lime</option>
+                <option value="teal">Teal</option>
+                <option value="navy">Navy</option>
+                <option value="white">White</option>
+            </select>
+            <select id="modeSelect4">
+                <option value="normal">Normal</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+
+        <div className="color-select">
+            <label for="c5">Color 5</label>
+            <select id="c5" name="c5">
+                <option value="">(None)</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="brown">Brown</option>
+                <option value="gray">Gray</option>
+                <option value="cyan">Cyan</option>
+                <option value="magenta">Magenta</option>
+                <option value="lime">Lime</option>
+                <option value="teal">Teal</option>
+                <option value="navy">Navy</option>
+                <option value="white">White</option>
+            </select>
+            <select id="modeSelect5">
+                <option value="normal">Normal</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+
+
+          
+          {/*
           <div className="input-group">
             <label>Colours Detected</label>
             <textarea
@@ -80,6 +223,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
               className="detected-info"
             />
           </div>
+          */}
 
           <div className="input-group">
             <label>Medium Detected</label>
