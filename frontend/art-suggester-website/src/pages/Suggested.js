@@ -1,20 +1,28 @@
 import "./Suggested.css"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import NavBar from "../components/NavBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
+import { AuthContext } from '../AuthContext';
+import { useNavigate } from "react-router-dom";
 
 export default function Suggested() {
     const [suggested, setSuggested] = useState([]);
     const [favourites, setFavourites] = useState([]);
-    const userEmail = "test"; // Replace with actual logged-in user email
-    const userPassword = "test"; // Replace with actual logged-in user password
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
+        // Redirect to login page if user is not logged in
+        if (!user) { 
+            navigate("/login");
+            return;
+        }
+
         fetchSuggestedImages();
         fetchFavourites();
-    }, []);
+    }, [user, navigate]);
 
     function fetchSuggestedImages() {
         fetch("http://localhost:5000/getSuggestedImagesLength")
@@ -46,7 +54,7 @@ export default function Suggested() {
     }
 
     function fetchFavourites() {
-        fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`)
+        fetch(`http://localhost:5000/getFavImages?email=${encodeURIComponent(user.email)}&password=${encodeURIComponent(user.password)}`)
         .then(response => response.json())
         .then(data => {
             console.log("Fetched favourites:", data);
@@ -69,7 +77,7 @@ export default function Suggested() {
             fetch(`http://localhost:5000/removeFavImage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+                body: JSON.stringify({ email: user.email, password: user.password, filename })
             })
             .then(response => response.json())
             .then(data => {
@@ -85,7 +93,7 @@ export default function Suggested() {
             fetch(`http://localhost:5000/addFavImage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: userEmail, password: userPassword, filename })
+                body: JSON.stringify({ email: user.email, password: user.password, filename })
             })
             .then(response => response.json())
             .then(data => {
