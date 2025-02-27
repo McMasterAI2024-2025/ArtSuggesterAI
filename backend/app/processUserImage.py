@@ -68,7 +68,8 @@ colour_codes = {
     "navy_normal": (0, 0, 128),
     "navy_dark": (0, 0, 102),
     "navy_light": (173, 216, 230),
-    "white": (255,255,255)
+    "white": (255,255,255),
+    "black": (0,0,0)
 }
 
 
@@ -185,9 +186,9 @@ def processUserImage(fixed_json):
     if fixed_medium == "paints":
         he_medium = [0,0,1]
     elif fixed_medium == "pencilcrayons":
-        he_medium = [0,0,1] #0,1,0
+        he_medium = [0,1,0] #0,1,0
     else:
-        he_medium = [0,0,1] #1,0,0
+        he_medium = [1,0,0] #1,0,0
 
     for e in he_medium:
         processed_image.append(e)
@@ -323,9 +324,9 @@ def get_info(image_name):
     if predicted_label == "paints":
         he_medium = [0,0,1]
     elif predicted_label == "pencilcrayons":
-        he_medium = [0,0,1] #0,1,0
+        he_medium = [0,1,0] #0,1,0
     else:
-        he_medium = [0,0,1] #1,0,0
+        he_medium = [1,0,0] #1,0,0
 
     for e in he_medium:
         processed_image.append(e)

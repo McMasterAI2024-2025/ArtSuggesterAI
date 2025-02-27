@@ -16,7 +16,7 @@ def SimilaritySearch(input_array):
     identifier = str(uuid.uuid4())
     
     # load preprocessed image data from file
-    data_base = os.path.join(script_dir, "data_np.npz")
+    data_base = os.path.join(script_dir, "data_np_2.npz")
     loaded = np.load(data_base)
     data_np = loaded['arr_0']
     
@@ -25,7 +25,7 @@ def SimilaritySearch(input_array):
 
     # filter arrays where the first three elements match
     last_index_value = input_array[0:3]
-    print(last_index_value)
+    print("this is medium", last_index_value)
     filtered_arrays = array_of_arrays[np.all(array_of_arrays[:, 49152:49155] == last_index_value, axis=1)]
 
     if len(filtered_arrays) == 0:
@@ -37,7 +37,7 @@ def SimilaritySearch(input_array):
 
         # extract the portion of filtered arrays starting after the first three elements
         filtered_subarrays = filtered_arrays[:, 49155:]
-        print("Filtered sub", filtered_subarrays[0])
+        print("Filtered sub", filtered_subarrays[100])
 
         def find_similar_images(input_colors, image_color_lists, top_n=5):
             # calculate similarity scores for each image
