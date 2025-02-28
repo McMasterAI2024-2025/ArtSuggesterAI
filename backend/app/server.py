@@ -13,6 +13,7 @@ import base64
 
 app = Flask(__name__)
 CORS(app, expose_headers=["X-Filename"])  # Enable CORS for all routes
+#CORS(app)
 
 MONGODB_URI = "mongodb+srv://j:j@cluster0.jry9m.mongodb.net/artSuggester?retryWrites=true&w=majority"
 

@@ -16,7 +16,7 @@ def SimilaritySearch(input_array):
     identifier = str(uuid.uuid4())
     
     # load preprocessed image data from file
-    data_base = os.path.join(script_dir, "data_np.npz")
+    data_base = os.path.join(script_dir, "data_np_2.npz")
     loaded = np.load(data_base)
     data_np = loaded['arr_0']
     
