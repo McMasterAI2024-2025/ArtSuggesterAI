@@ -19,6 +19,11 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
   const [c3,setC3] = useState("None");
   const [c4,setC4] = useState("None");
   const [c5,setC5] = useState("None");
+  const [m1,setM1] = useState("Normal");
+  const [m2,setM2] = useState("Normal");
+  const [m3,setM3] = useState("Normal");
+  const [m4,setM4] = useState("Normal");
+  const [m5,setM5] = useState("Normal");
 
   // Update states when uploadData changes
   useEffect(() => {
@@ -32,6 +37,30 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
       }
     }
   }, [uploadData]);
+
+  useEffect(() => {
+    const info = detectedColors.split(",")
+    const processed = info.map(item => item.split("_"))
+    console.log(processed)
+    const len = detectedColors.length
+    if(len > 0){
+      setC1(processed[0][0]);
+    }
+    if(len > 1){
+      setC2(processed[1][0]);
+      console.log(c2);
+    }
+    if(len > 2){
+      setC4(processed[2][0]);
+    }
+    if(len > 3){
+      setC3(processed[3][0]);
+      console.log(c2);
+    }
+    if(len > 4){
+      setC5(processed[4][0]);
+    }
+  })
 
   const navigate = useNavigate();
 
@@ -80,7 +109,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
         <div>
           <div className="color-select">
             <label for="c1">Color 1</label>
-            <select id="c1" name="c1" className = "color">
+            <select id="c1" name="c1" className = "color" value = {c1} onChange={(e) => setC1(e.target.value)}>
                 <option value="">(None)</option>
                 <option value="red">Red</option>
                 <option value="green">Green</option>
@@ -107,7 +136,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
         <div className="color-select">
             <label for="c2">Color 2</label>
-            <select id="c2" name="c2">
+            <select id="c2" name="c2" className = "color" value = {c2} onChange={(e) => setC2(e.target.value)}>
                 <option value="">(None)</option>
                 <option value="red">Red</option>
                 <option value="green">Green</option>
@@ -134,7 +163,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
         <div className="color-select">
             <label for="c3">Color 3</label>
-            <select id="c3" name="c3">
+            <select id="c3" name="c3" value = {c3} onChange={(e) => setC3(e.target.value)}>
                 <option value="">(None)</option>
                 <option value="red">Red</option>
                 <option value="green">Green</option>
@@ -161,7 +190,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
         <div className="color-select">
             <label for="c4">Color 4</label>
-            <select id="c4" name="c4">
+            <select id="c4" name="c4" value = {c4} on onChange={(e) => setC4(e.target.value)}>
                 <option value="">(None)</option>
                 <option value="red">Red</option>
                 <option value="green">Green</option>
@@ -188,7 +217,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
         <div className="color-select">
             <label for="c5">Color 5</label>
-            <select id="c5" name="c5">
+            <select id="c5" name="c5" value = {c5} on onChange={(e) => setC5(e.target.value)}>
                 <option value="">(None)</option>
                 <option value="red">Red</option>
                 <option value="green">Green</option>
