@@ -23,6 +23,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
   // Update states when uploadData changes
   useEffect(() => {
     if (uploadData) {
+      console.log("Updating data")
       if (uploadData.Colours) {
         setDetectedColors(uploadData.Colours.join(", "));
       }
