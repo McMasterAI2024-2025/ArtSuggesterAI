@@ -82,7 +82,7 @@ def SimilaritySearch(input_array):
         print("More filtered subarray", more_filtered_subarrays)
 
         # find the top 5 most similar arrays
-        top_arrays = find_similar_images(more_input_subarray, more_filtered_subarrays, top_n=9)
+        top_arrays = find_similar_images(more_input_subarray, more_filtered_subarrays, top_n=12)
         print('')
         print("filtered input subarray", more_input_subarray)
         print('')
