@@ -1,41 +1,44 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './CameraCapture.css';
 
-const CameraCapture = ({ setUploadFile, setPanelOpen }) => {
-  // states to track camera activity and captured image activity
+const CameraCapture = ({ setUploadFile, setPanelOpen, deviceId }) => {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [imageCaptured, setImageCaptured] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
-  // getUserMedia api
   useEffect(() => {
-    // browser support => activate camera
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-          videoRef.current.srcObject = stream;
-          setIsCameraActive(true);
-        })
-        .catch((err) => {
-          console.error("Error accessing the camera:", err);
+    const startCamera = async () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: deviceId ? { deviceId: { exact: deviceId } } : true,
         });
-    }
-    // clean stream i.e. stop camera video feed
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
+
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        setIsCameraActive(true);
+      } catch (err) {
+        console.error("Error accessing the camera:", err);
       }
     };
-  }, []);
 
-  // use canvas to draw image
+    if (deviceId) startCamera();
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [deviceId]);
+
   const captureImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    // get current video frame and draw to image
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
     const capturedImage = canvas.toDataURL('image/jpeg');
@@ -43,7 +46,6 @@ const CameraCapture = ({ setUploadFile, setPanelOpen }) => {
     setUploadFile(dataURLtoFile(capturedImage, "captured-image.jpg"));
   };
 
-  // convert Base64 data to image file
   const dataURLtoFile = (dataURL, filename) => {
     const arr = dataURL.split(',');
     const mime = arr[0].match(/:(.*?);/)[1];
@@ -55,7 +57,6 @@ const CameraCapture = ({ setUploadFile, setPanelOpen }) => {
       u8arr[n] = bstr.charCodeAt(n);
     }
 
-    // return .jpg file from byte arr
     return new File([u8arr], filename, { type: mime });
   };
 
