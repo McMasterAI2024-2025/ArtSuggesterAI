@@ -16,7 +16,7 @@ def SimilaritySearch(input_array):
     identifier = str(uuid.uuid4())
     
     # load preprocessed image data from file
-    data_base = os.path.join(script_dir, "data_np_2.npz")
+    data_base = os.path.join(script_dir, "data_np_3.npz")
     loaded = np.load(data_base)
     data_np = loaded['arr_0']
     
@@ -40,12 +40,12 @@ def SimilaritySearch(input_array):
         print("Filtered sub", filtered_subarrays[0])
 
         def find_similar_images(input_colors, image_color_lists, top_n=5):
-            # calculate similarity scores for each image
+            # Calculate similarity scores for each image
             similarity_scores = [(index, image, 0) for index, image in enumerate(image_color_lists)]
             
             for color in input_colors:
                 for i, (index, image, score) in enumerate(similarity_scores):
-                    # update similarity scores based on color positions
+                    # Update similarity scores based on color positions
                     if color == image[0]:
                         similarity_scores[i] = (index, image, score + 5)
                     elif color == image[1]:
@@ -57,9 +57,24 @@ def SimilaritySearch(input_array):
                     elif color == image[4]:
                         similarity_scores[i] = (index, image, score + 1)
             
-            # sort by scores and return the top matches
+            # Sort by scores in descending order
             similarity_scores.sort(key=lambda x: x[2], reverse=True)
-            return similarity_scores[:top_n]
+            
+            # Filter to ensure unique images
+            unique_images = set()
+            filtered_scores = []
+            
+            for index, image, score in similarity_scores:
+                image_tuple = tuple(image)  # Convert to tuple for uniqueness check
+                if image_tuple not in unique_images:
+                    unique_images.add(image_tuple)
+                    filtered_scores.append((index, image, score))
+                
+                # Ensure we get exactly `top_n` unique images
+                if len(filtered_scores) == top_n:
+                    break
+            
+            return filtered_scores
 
         # further filter for the first 5 colors
         more_filtered_subarrays = filtered_subarrays[:, :5]
@@ -67,22 +82,19 @@ def SimilaritySearch(input_array):
         print("More filtered subarray", more_filtered_subarrays)
 
         # find the top 5 most similar arrays
-        top_5_arrays = find_similar_images(more_input_subarray, more_filtered_subarrays, top_n=9)
+        top_arrays = find_similar_images(more_input_subarray, more_filtered_subarrays, top_n=9)
         print('')
         print("filtered input subarray", more_input_subarray)
         print('')
         print(f"Filtered Arrays: \n{filtered_arrays}")
-        print(f"Most Similar Arrays!:\n {top_5_arrays}")
+        print(f"Most Similar Arrays!:\n {top_arrays}")
 
         # resolve the top matches to their original arrays
-        for ind in range(len(top_5_arrays)):
-            if top_5_arrays[ind][0] == 2360:
-                top_5_arrays[ind] = filtered_arrays[top_5_arrays[ind + 8][0]]
-            else:
-                top_5_arrays[ind] = filtered_arrays[top_5_arrays[ind][0]]
+        for ind in range(len(top_arrays)):
+            top_arrays[ind] = filtered_arrays[top_arrays[ind][0]]
 
         i = 1
-    for PixelImage in top_5_arrays:
+    for PixelImage in top_arrays:
         # use only the first 49152 values for RGB data
         PixelImage = PixelImage[:49152]
         image_size = (128, 128, 3)  # define shape for RGB images

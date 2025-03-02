@@ -157,7 +157,7 @@ def rank_colours(image_name):
 
 
     if len(ranked_colour_ids) < 5:
-        ranked_colour_ids += [ranked_colour_ids[0]] * (5 - len(ranked_colour_ids))
+        ranked_colour_ids += ["_dark"] * (5 - len(ranked_colour_ids))
 
     # Reverse the colour_ids mapping
     reverse_colour_ids = {v: k for k, v in colour_ids.items()}
@@ -233,7 +233,6 @@ def processUserImage(fixed_json):
 
     # Find 5 most prominent colours
     colour_ranks = fixed_color_list
-    # Still need to convert into the one hot encoded
 
     index_colours_ranks = []
     for col in colour_ranks:
@@ -244,7 +243,9 @@ def processUserImage(fixed_json):
             index += 1
 
     colour_ranks = index_colours_ranks
+    print("indexed colour list ",index_colours_ranks)
 
+    index_colours_ranks += [-1] * (5 - len(index_colours_ranks))
 
     for col in colour_ranks:
         processed_image.append(col)
@@ -254,7 +255,7 @@ def processUserImage(fixed_json):
         processed_image.append(0)
     #this is style
 
-    print(processed_image)
+    print("process image: ",processed_image)
     SimilaritySearch(processed_image)
 
 
@@ -354,7 +355,7 @@ def get_info(image_name):
 
     if len(top_colours) < 5:
         # If fewer than 5 colours, repeat the most common colours to fill up the list
-        top_colours += [top_colours[0]] * (5 - len(top_colours))
+        top_colours += ["_dark"] * (5 - len(top_colours))
 
     top_colours = np.array(colour_ranks).flatten()
 
