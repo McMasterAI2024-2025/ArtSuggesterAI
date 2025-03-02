@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Favourites from './pages/Favourites';
 import Suggested from './pages/Suggested';
+import About from './pages/About';
 import NoPage from './pages/NoPage';
 import './App.css';
 import "@fontsource/fira-code";
@@ -21,6 +22,7 @@ function App() {
             <Route path="/favourites" element={<Favourites />} />
             <Route path="/suggested" element={<Suggested />} />
             <Route path="/createAccount" element={<CreateAccount />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NoPage />} />
           </Routes>
         </BrowserRouter>

@@ -1,0 +1,35 @@
+.about-page {
+    padding: 20px;
+}
+
+.about-section {
+    margin-bottom: 40px;
+}
+
+.about-section h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.about-section p {
+    font-size: 18px;
+    line-height: 1.6;
+    padding-right: 280px;
+    padding-left: 280px;
+}
+
+.flow-chart {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.flow-chart img {
+    max-width: 100%;
+    height: auto;
+}
+
+.flow-chart-description {
+    font-size: 14px;
+    color: #555;
+    margin-top: 10px;
+}
