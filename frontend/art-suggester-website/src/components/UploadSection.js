@@ -38,7 +38,7 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
                 console.log('File uploaded successfully:', result);
                 setUploadData(result); // You'll need to add this as a prop
             } else {
-                console.error('Upload failed:', result);
+                console.error('Upload failed:', result, result.colours);
             }
         } catch (error) {
             console.error('Error uploading file:', error);
