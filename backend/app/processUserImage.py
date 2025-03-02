@@ -118,6 +118,11 @@ def rank_colours(image_name):
     # Ensure 'brown_normal' is always a background color by adding its index
     if colour_ids["brown_normal"] not in background_colors:
         background_colors.append(colour_ids["brown_normal"])
+    if colour_ids["brown_dark"] not in background_colors:
+        background_colors.append(colour_ids["brown_dark"])
+    if colour_ids["brown_light"] not in background_colors:
+        background_colors.append(colour_ids["brown_light"])
+
     print("Background colors1:", background_colors)
     # Map background color indices to actual color names
     background_color_names = [list(colour_ids.keys())[idx] for idx in background_colors]

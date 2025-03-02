@@ -1,6 +1,6 @@
 import './UploadSection.css';
 import DragNdrop from './DragNDrop';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import CameraCapture from './CameraCapture';
 import { AuthContext } from '../AuthContext';
 import { useNavigate } from "react-router-dom";
@@ -9,11 +9,22 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // webcam state control for showing and hiding the webcam preview
     const [showCamera, setShowCamera] = useState(false);
+    const [devices, setDevices] = useState([]);
+    const [selectedDeviceId, setSelectedDeviceId] = useState("");
+
+    useEffect(() => {
+        // Fetch available cameras
+        navigator.mediaDevices.enumerateDevices().then((deviceInfos) => {
+            const videoDevices = deviceInfos.filter((device) => device.kind === "videoinput");
+            setDevices(videoDevices);
+            if (videoDevices.length > 0) {
+                setSelectedDeviceId(videoDevices[0].deviceId);
+            }
+        });
+    }, []);
 
     const uploadBtnClick = async () => {
-        // Redirect to login page if user is not logged in
         if (!user) {
             navigate("/login");
             return;
@@ -21,22 +32,19 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
 
         if (panelOpen || uploadFile == null) return;
 
-        // form field and associated value
         const formData = new FormData();
         formData.append('file', uploadFile);
 
         try {
-            // post request to the flask backend to upload the file
             const response = await fetch('http://localhost:5000/uploadFile', {
                 method: 'POST',
                 body: formData,
             });
 
-            // check for upload success
             const result = await response.json();
             if (response.ok) {
                 console.log('File uploaded successfully:', result);
-                setUploadData(result); // You'll need to add this as a prop
+                setUploadData(result);
             } else {
                 console.error('Upload failed:', result, result.colours);
             }
@@ -48,21 +56,40 @@ export default function UploadSection({ uploadFile, setUploadFile, panelOpen, se
     }
 
     return (
-        <>
-            <div className="upload-section">
-                <DragNdrop uploadFile={uploadFile} setUploadFile={setUploadFile} />
-                <button 
-                    className="take-photo-btn" 
-                    onClick={() => setShowCamera(prevState => !prevState)} // toggle camera visibility
-                >
-                    {showCamera ? 'Close Webcam' : 'Open Webcam' /* change button name when camera state is toggled */ }
-                </button>
-                {showCamera && (
-                    <CameraCapture setUploadFile={setUploadFile} setPanelOpen={setPanelOpen} />
-                )}
-                <button className="upload-btn" onClick={uploadBtnClick}>Upload</button>
-                <p className="supported-types">Supported file types: .pdf, .jpg, .webp, ...</p>
-            </div>
-        </>
+        <div className="upload-section">
+            <DragNdrop uploadFile={uploadFile} setUploadFile={setUploadFile} />
+            
+            <button 
+                className="take-photo-btn" 
+                onClick={() => setShowCamera(prev => !prev)}
+            >
+                {showCamera ? 'Close Webcam' : 'Open Webcam'}
+            </button>
+
+            {showCamera && (
+                <>
+                    <label>Choose Camera:</label>
+                    <select 
+                        value={selectedDeviceId} 
+                        onChange={(e) => setSelectedDeviceId(e.target.value)}
+                    >
+                        {devices.map((device, index) => (
+                            <option key={device.deviceId} value={device.deviceId}>
+                                {device.label || `Camera ${index + 1}`}
+                            </option>
+                        ))}
+                    </select>
+                    
+                    <CameraCapture 
+                        setUploadFile={setUploadFile} 
+                        setPanelOpen={setPanelOpen} 
+                        deviceId={selectedDeviceId} // Pass selected camera
+                    />
+                </>
+            )}
+
+            <button className="upload-btn" onClick={uploadBtnClick}>Upload</button>
+            <p className="supported-types">Supported file types: .pdf, .jpg, .webp, ...</p>
+        </div>
     );
 };
