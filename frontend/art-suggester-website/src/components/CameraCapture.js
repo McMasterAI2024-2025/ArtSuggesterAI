@@ -4,6 +4,12 @@ import './CameraCapture.css';
 const CameraCapture = ({ setUploadFile, setPanelOpen, deviceId }) => {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [imageCaptured, setImageCaptured] = useState(null);
+  const [filters, setFilters] = useState({
+    brightness: 120,
+    contrast: 120,
+    saturation: 120,
+  });
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -39,6 +45,7 @@ const CameraCapture = ({ setUploadFile, setPanelOpen, deviceId }) => {
   const captureImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
+    context.filter = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%)`;
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
     const capturedImage = canvas.toDataURL('image/jpeg');
@@ -63,17 +70,31 @@ const CameraCapture = ({ setUploadFile, setPanelOpen, deviceId }) => {
   return (
     <div className="camera-capture-container">
       <div className="camera-preview">
-        <video ref={videoRef} autoPlay></video>
+        <video
+          ref={videoRef}
+          autoPlay
+          style={{
+            filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%)`,
+          }}
+        ></video>
         <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480"></canvas>
+      </div>
+
+      {/* Sliders for Adjusting Filters */}
+      <div className="filter-controls">
+        <label>Brightness: {filters.brightness}%</label>
+        <input type="range" min="50" max="200" value={filters.brightness} onChange={e => setFilters({ ...filters, brightness: e.target.value })} />
+
+        <label>Contrast: {filters.contrast}%</label>
+        <input type="range" min="50" max="200" value={filters.contrast} onChange={e => setFilters({ ...filters, contrast: e.target.value })} />
+
+        <label>Saturation: {filters.saturation}%</label>
+        <input type="range" min="50" max="200" value={filters.saturation} onChange={e => setFilters({ ...filters, saturation: e.target.value })} />
       </div>
 
       <div className="capture-actions">
         <button onClick={captureImage} disabled={!isCameraActive}>Capture</button>
-        {imageCaptured && (
-          <div>
-            <img src={imageCaptured} alt="Captured" style={{ maxWidth: '300px', marginTop: '10px' }} />
-          </div>
-        )}
+        {imageCaptured && <img src={imageCaptured} alt="Captured" style={{ maxWidth: '300px', marginTop: '10px' }} />}
       </div>
     </div>
   );
