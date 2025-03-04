@@ -17,13 +17,21 @@
     margin-bottom: 10px;
   }
 
+
   .color-select label{
-    margin-right: 5px;
+    margin-right: 10px;
   }
   
   .color-select select{
     width: 25%;
-    margin-right: 5px;
+    background-color: var(--background);
+    border: 1px solid var(--content);
+    border-radius: 10px;
+    color: var(--content);
+    resize: vertical;
+    font-family: inherit;
+    font-size: .8rem;
+    margin-right:10px;
   }
 
 
