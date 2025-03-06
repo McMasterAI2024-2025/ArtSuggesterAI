@@ -40,7 +40,7 @@ const DragNdrop = ({ uploadFile, setUploadFile }) => {
           <input {...getInputProps()} />
           {isDragActive ? (
             <div className="active-drop-div">
-              <p>Upload image file here:</p>
+              <p>Upload art supplies here:</p>
               <div className="upload-icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@ const DragNdrop = ({ uploadFile, setUploadFile }) => {
             </div>
           ) : (
             <div className="drop-default-div">
-              <p>Upload image file here:</p>
+              <p>Upload art supplies here:</p>
               <div className="upload-icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
