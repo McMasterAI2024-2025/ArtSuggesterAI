@@ -19,7 +19,7 @@ export default function Home() {
             </>)}
 
             <main className="main-section">
-                <h1>Art Suggester AI</h1>
+                <img src="images/logoart.png" alt="Art Suggester AI Logo" class="logo"/>
                 <p className="home-subtitle">- from the McMaster AI Society</p>
                 <UploadSection 
                     uploadFile={uploadFile} 
