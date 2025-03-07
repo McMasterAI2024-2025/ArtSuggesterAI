@@ -92,6 +92,7 @@
   
   .input-group {
     margin-bottom: 30px;
+    margin-top: 30px;
   }
   
   .input-group label {
@@ -104,8 +105,6 @@
   .detected-info {
     width: 100%;
     width: 380px;
-    min-height: 60px;
-    max-height: 20vh;
     padding: 12px;
     background-color: var(--background);
     border: 1px solid var(--content);

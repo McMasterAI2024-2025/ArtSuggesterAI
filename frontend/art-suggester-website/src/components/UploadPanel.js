@@ -312,11 +312,15 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
           <div className="input-group">
             <label>Medium Detected</label>
-            <textarea
+            <select
               value={detectedMediums}
               onChange={(e) => setDetectedMediums(e.target.value)}
               className="detected-info"
-            />
+            >
+              <option value="paint">Paint</option>
+              <option value="pencil crayons">Pencil Crayons</option>
+              <option value="marker">Marker</option>
+            </select>
           </div>
           
           <button
