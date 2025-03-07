@@ -317,9 +317,9 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
               onChange={(e) => setDetectedMediums(e.target.value)}
               className="detected-info"
             >
-              <option value="paint">Paint</option>
-              <option value="pencil crayons">Pencil Crayons</option>
-              <option value="marker">Marker</option>
+              <option value="paints">Paint</option>
+              <option value="pencilcrayons">Pencil Crayons</option>
+              <option value="markers">Marker</option>
             </select>
           </div>
           
