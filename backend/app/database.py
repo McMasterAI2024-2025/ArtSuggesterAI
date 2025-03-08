@@ -18,8 +18,8 @@ collection = db["users"]
 
 ##Printitn db because I can't login...
 stuff = collection.find({})
-for s in stuff:
-    print (s)
+# for s in stuff:
+#     print (s)
 
 
 ##Add a user
@@ -31,10 +31,22 @@ def addUser(email: str, password: str):
             "email": email, 
             "password": password, 
             "favourites": [], 
-            "favStyle": [0,0,0,0,0]
+            "favStyle": [0,0,0,0,0,0,0]
         }) 
         return ("Added")
     return None
+
+def updateFavStyle(email: str, new_fav_style: list):
+    user = collection.find_one({"email": email})
+    if user:
+        collection.update_one(
+            {"email": email},
+            {"$set": {"favStyle": new_fav_style}}
+        )
+        return "Updated"
+    return "User not found"
+
+
 
 ##Try to login
 def login(email: str, password: str):
@@ -43,16 +55,10 @@ def login(email: str, password: str):
         return None
     return "Success"
 
-def updateFavStyle(email: str, password: str, style: int):
-    if login(email,password) == "Success":
-        collection.update_one({"email": email}, {"$set": {"favStyle": style}})
-        return ("FavStyle updated")
-    return None
-
 
 def removeFavStyle(email: str, password: str):
     if login(email,password) == "Success":
-        collection.update_one({"email": email}, {"$set": {"favStyle": [0,0,0,0,0]}})
+        collection.update_one({"email": email}, {"$set": {"favStyle": [0,0,0,0,0,0,0]}})
         return ("FavStyle cleared")
     return None
 

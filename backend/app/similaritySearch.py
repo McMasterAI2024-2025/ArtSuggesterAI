@@ -8,7 +8,29 @@ from PIL import Image
 import os
 import uuid
 
-def SimilaritySearch(input_array):
+import pymongo
+from dotenv import load_dotenv 
+from pymongo import MongoClient
+import certifi
+
+MONGODB_URI = "mongodb+srv://j:j@cluster0.jry9m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+load_dotenv()
+#database_url = os.getenv("MONGODB_URI")
+database_url = MONGODB_URI
+cluster = MongoClient(database_url)
+db = cluster["artSuggester"]
+collection = db["users"]
+
+def SimilaritySearch(input_array,email):
+    def getFavStyle(email: str):
+        user = collection.find_one({"email": email})
+        if user:
+            return user.get("favStyle", "FavStyle not found")
+        return "User not found"
+    userfavstyle = getFavStyle(email)
+    print('this is fav style from user db ',userfavstyle)
+
     # get the current script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -47,15 +69,25 @@ def SimilaritySearch(input_array):
                 for i, (index, image, score) in enumerate(similarity_scores):
                     # Update similarity scores based on color positions
                     if color == image[0]:
-                        similarity_scores[i] = (index, image, score + 5)
+                        score += 5
+                        similarity_scores[i] = (index, image, score)
                     elif color == image[1]:
-                        similarity_scores[i] = (index, image, score + 4)
+                        score += 4
+                        similarity_scores[i] = (index, image, score)
                     elif color == image[2]:
-                        similarity_scores[i] = (index, image, score + 3)
+                        score+=3
+                        similarity_scores[i] = (index, image, score)
                     elif color == image[3]:
-                        similarity_scores[i] = (index, image, score + 2)
+                        score += 2
+                        similarity_scores[i] = (index, image, score)
                     elif color == image[4]:
-                        similarity_scores[i] = (index, image, score + 1)
+                        score += 1
+                        similarity_scores[i] = (index, image, score)
+                    # future implementation where it suggests more of your favorite style
+                    # if np.array_equal(image[-7:], np.array(userfavstyle)):
+                    #     score += 0.5
+                    #     similarity_scores[i] = (index, image, score)
+
             
             # Sort by scores in descending order
             similarity_scores.sort(key=lambda x: x[2], reverse=True)
@@ -77,7 +109,7 @@ def SimilaritySearch(input_array):
             return filtered_scores
 
         # further filter for the first 5 colors
-        more_filtered_subarrays = filtered_subarrays[:, :5]
+        more_filtered_subarrays = filtered_subarrays#[:, :5]
         more_input_subarray = input_subarray[:5]
         print("More filtered subarray", more_filtered_subarrays)
 
@@ -90,9 +122,10 @@ def SimilaritySearch(input_array):
         print(f"Most Similar Arrays!:\n {top_arrays}")
 
         # resolve the top matches to their original arrays
+        favsstyles = []
         for ind in range(len(top_arrays)):
+            favsstyles.append(filtered_arrays[top_arrays[ind][0]][-7:])
             top_arrays[ind] = filtered_arrays[top_arrays[ind][0]]
-
         i = 1
     for PixelImage in top_arrays:
         # use only the first 49152 values for RGB data
@@ -110,9 +143,11 @@ def SimilaritySearch(input_array):
         # save the image
         output_folder = "returnImages"
         os.makedirs(output_folder, exist_ok=True)  # create the folder if it doesn't exist
-        output_path = os.path.join(output_folder, f"{identifier}_{i}.png")
+        styleofimage = ''.join(map(str, favsstyles[i-1]))
+        output_path = os.path.join(output_folder, f"{styleofimage}{identifier}_{i}.png")
         image.save(output_path)
 
+        print(f"name is {identifier}_{i}.png")
         print(f"Image saved to {output_path}")
         i += 1
 

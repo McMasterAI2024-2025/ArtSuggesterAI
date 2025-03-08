@@ -215,7 +215,7 @@ def processUserImage(fixed_json):
     # Get the current script's directory
     fixed_color_list = fixed_json['colours']
     fixed_medium = fixed_json['medium']
-    favorite_style = None #retrieve from database
+    email = fixed_json['email'] #retrieve from database
     print("fixed user colour list: ",fixed_color_list)
 
     processed_image = []
@@ -256,7 +256,7 @@ def processUserImage(fixed_json):
     #this is style
 
     print("process image: ",processed_image)
-    SimilaritySearch(processed_image)
+    SimilaritySearch(processed_image,email)
 
 
 # processUserImage("IMG_0058.jpg")

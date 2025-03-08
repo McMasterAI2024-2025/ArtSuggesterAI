@@ -2,10 +2,11 @@
  * Harrison Johns, Johann Caancan
  */
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import './UploadPanel.css'
 import { Navigate, useNavigate } from "react-router-dom";
 import { faBorderNone } from "@fortawesome/free-solid-svg-icons";
+import { AuthContext } from '../AuthContext';
 
 const UploadPanel = ({ closePanel, img_url, uploadData }) => {
   // Initialize states with uploadData if available, otherwise use placeholders
@@ -15,6 +16,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
   const [detectedMediums, setDetectedMediums] = useState(
     uploadData?.medium || '{pencil crayons, paint, marker, ...}'
   );
+  const { user } = useContext(AuthContext);
 
   const [colorsAndModes, setColorsAndModes] = useState([["Bruh","normal"],["(None)","normal"],["(None)","normal"],["(None)","normal"],["(None)","normal"]]);
 
@@ -128,12 +130,14 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
 
     try {
         // Send POST request to Flask backend
+        const combinedData = { ...fixed_dict, ...user };
+
         const response = await fetch('http://localhost:5000/confirmInfo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(fixed_dict)
+            body: JSON.stringify(combinedData)
         });
 
         // Check if request was successful
@@ -236,7 +240,7 @@ const UploadPanel = ({ closePanel, img_url, uploadData }) => {
                 <option value="navy">Navy</option>
                 <option value="white">White</option>
             </select>
-            <select id="modeSelect3">
+            <select id="modeSelect3" value = {colorsAndModes[2][1]} onChange={(e) => change(2,1,e.target.value)}>
                 <option value="normal">Normal</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
